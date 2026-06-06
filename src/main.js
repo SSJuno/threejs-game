@@ -1,0 +1,62 @@
+import './style.css';
+import * as THREE from 'three';
+import { buildWorld } from './world.js';
+import { Player } from './player.js';
+import { CameraController } from './camera.js';
+
+const app = document.querySelector('#app');
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87a8c4);
+scene.fog = new THREE.Fog(0x87a8c4, 30, 80);
+
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+app.appendChild(renderer.domElement);
+
+const ambient = new THREE.AmbientLight(0x8899aa, 0.6);
+const sun = new THREE.DirectionalLight(0xffeedd, 1.2);
+sun.position.set(20, 30, 10);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 80;
+sun.shadow.camera.left = -35;
+sun.shadow.camera.right = 35;
+sun.shadow.camera.top = 35;
+sun.shadow.camera.bottom = -35;
+scene.add(ambient, sun);
+
+const colliders = buildWorld(scene);
+const player = new Player(scene);
+const camCtrl = new CameraController(camera, renderer.domElement);
+
+const hud = document.createElement('div');
+hud.id = 'hud';
+hud.innerHTML = 'WASD move · Double-tap direction to dash · Space jump (x2) · Drag mouse to rotate camera';
+app.appendChild(hud);
+
+const clock = new THREE.Clock();
+
+function onResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+window.addEventListener('resize', onResize);
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+
+  player.update(dt, camCtrl, colliders);
+  camCtrl.update(player.mesh.position, dt);
+
+  renderer.render(scene, camera);
+}
+
+animate();
