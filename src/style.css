@@ -30,3 +30,63 @@ canvas {
   pointer-events: none;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
+
+#dummy-hud {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  pointer-events: none;
+  text-align: center;
+}
+
+#dummy-label {
+  color: #eee;
+  font: 13px/1.4 system-ui, sans-serif;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  margin-bottom: 4px;
+}
+
+#dummy-bar-track {
+  height: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#dummy-bar-fill {
+  height: 100%;
+  width: 100%;
+  background: #cc2222;
+  border-radius: 3px;
+  transition: width 0.1s linear;
+}
+
+#fireball-cooldown {
+  margin-top: 8px;
+}
+
+#fireball-cd-label {
+  color: #ffb366;
+  font: 11px/1.4 system-ui, sans-serif;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  margin-bottom: 3px;
+}
+
+#fireball-cd-track {
+  height: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 150, 50, 0.3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+#fireball-cd-fill {
+  height: 100%;
+  width: 0%;
+  background: #ff6600;
+  border-radius: 2px;
+  transition: width 0.05s linear;
+}

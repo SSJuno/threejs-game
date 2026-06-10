@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import { buildWorld } from './world.js';
 import { Player } from './player.js';
 import { CameraController } from './camera.js';
+import { Dummy } from './dummy.js';
+import { Fireball } from './spell.js';
 
 const app = document.querySelector('#app');
 
@@ -33,12 +35,25 @@ scene.add(ambient, sun);
 
 const colliders = buildWorld(scene);
 const player = new Player(scene);
+const dummy = new Dummy(scene);
 const camCtrl = new CameraController(camera, renderer.domElement);
+const fireball = new Fireball(scene, player, camera, dummy);
 
 const hud = document.createElement('div');
 hud.id = 'hud';
 hud.innerHTML = 'WASD move · Double-tap direction to dash · Space jump (x2) · Drag mouse to rotate camera';
 app.appendChild(hud);
+
+const dummyHud = document.createElement('div');
+dummyHud.id = 'dummy-hud';
+dummyHud.innerHTML = `
+  <div id="dummy-label">DUMMY 100/100</div>
+  <div id="dummy-bar-track"><div id="dummy-bar-fill"></div></div>
+`;
+app.appendChild(dummyHud);
+
+const dummyLabel = document.getElementById('dummy-label');
+const dummyBarFill = document.getElementById('dummy-bar-fill');
 
 const clock = new THREE.Clock();
 
@@ -53,8 +68,13 @@ function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.05);
 
-  player.update(dt, camCtrl, colliders);
+  dummy.update(dt, colliders);
+  player.update(dt, camCtrl, [...colliders, dummy.collider]);
+  fireball.update(dt);
   camCtrl.update(player.mesh.position, dt);
+
+  dummyLabel.textContent = `DUMMY ${Math.ceil(dummy.health)}/${dummy.maxHealth}`;
+  dummyBarFill.style.width = `${(dummy.health / dummy.maxHealth) * 100}%`;
 
   renderer.render(scene, camera);
 }

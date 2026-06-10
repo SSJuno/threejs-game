@@ -44,9 +44,15 @@ export function buildWorld(scene) {
     addCollider(colliders, w.x, w.h / 2, w.z, w.w / 2, w.h / 2, w.d / 2);
 
     if (w.broken) {
-      const chunk = box(w.w * 0.3, w.h * 0.4, w.d, DARK_STONE, w.x + w.w * 0.3, 0, w.z + 2);
+      const cw = w.w * 0.3;
+      const ch = w.h * 0.4;
+      const cd = w.d;
+      const cx = w.x + w.w * 0.3;
+      const cz = w.z + 2;
+      const chunk = box(cw, ch, cd, DARK_STONE, cx, 0, cz);
       chunk.rotation.z = 0.3;
       group.add(chunk);
+      addCollider(colliders, cx, ch / 2, cz, cw / 2, ch / 2, cd / 2);
     }
   }
 
@@ -67,9 +73,16 @@ export function buildWorld(scene) {
     addCollider(colliders, p.x, p.h / 2, p.z, 1, p.h / 2, 1);
 
     if (p.broken) {
-      const top = box(2.5, 0.8, 2.5, STONE, p.x + 1.2, p.h - 1, p.z);
+      const tw = 2.5;
+      const th = 0.8;
+      const td = 2.5;
+      const tx = p.x + 1.2;
+      const tz = p.z;
+      const ty = p.h - 1 + th / 2;
+      const top = box(tw, th, td, STONE, tx, p.h - 1, tz);
       top.rotation.z = 0.5;
       group.add(top);
+      addCollider(colliders, tx, ty, tz, tw / 2, th / 2, td / 2);
     } else {
       const cap = box(2.6, 0.6, 2.6, MOSS, p.x, p.h, p.z);
       group.add(cap);
@@ -109,11 +122,13 @@ export function buildWorld(scene) {
   for (let i = 0; i < 12; i++) {
     const sx = (Math.random() - 0.5) * 50;
     const sz = (Math.random() - 0.5) * 50;
+    const sw = 0.8 + Math.random();
     const sh = 0.3 + Math.random() * 0.8;
-    const debris = box(0.8 + Math.random(), sh, 0.8 + Math.random(), DARK_STONE, sx, 0, sz);
+    const sd = 0.8 + Math.random();
+    const debris = box(sw, sh, sd, DARK_STONE, sx, 0, sz);
     debris.rotation.y = Math.random() * Math.PI;
     group.add(debris);
-    addCollider(colliders, sx, sh / 2, sz, 0.5, sh / 2, 0.5);
+    addCollider(colliders, sx, sh / 2, sz, sw / 2, sh / 2, sd / 2);
   }
 
   scene.add(group);
