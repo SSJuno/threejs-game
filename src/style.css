@@ -90,3 +90,50 @@ canvas {
   border-radius: 2px;
   transition: width 0.05s linear;
 }
+
+#pause-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 15, 35, 0.6);
+  z-index: 100;
+}
+
+#pause-overlay[hidden] {
+  display: none;
+}
+
+#pause-title {
+  color: #e8f0ff;
+  font: 700 56px/1 system-ui, sans-serif;
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 24px rgba(100, 160, 255, 0.5);
+  margin-bottom: 48px;
+}
+
+#pause-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pause-option {
+  background: transparent;
+  border: 1px solid rgba(120, 170, 255, 0.35);
+  color: #c8d8f0;
+  cursor: pointer;
+  font: 600 22px/1 system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  padding: 14px 48px;
+  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, text-shadow 0.2s;
+}
+
+.pause-option:hover {
+  border-color: rgba(140, 200, 255, 0.9);
+  box-shadow: 0 0 20px rgba(80, 160, 255, 0.55), inset 0 0 12px rgba(80, 160, 255, 0.15);
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(120, 190, 255, 0.9);
+}

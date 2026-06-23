@@ -11,30 +11,22 @@ export class CameraController {
     this.camera = camera;
     this.yaw = 0;
     this.pitch = 0.3;
-    this.dragging = false;
-    this.prevX = 0;
-    this.prevY = 0;
     this._target = new THREE.Vector3();
 
-    domElement.addEventListener('mousedown', (e) => {
-      if (e.button !== 0) return;
-      this.dragging = true;
-      this.prevX = e.clientX;
-      this.prevY = e.clientY;
+    document.addEventListener('click', () => {
+      document.body.requestPointerLock();
     });
 
-    window.addEventListener('mouseup', () => {
-      this.dragging = false;
-    });
+    document.addEventListener('pointerlockchange', () => {});
 
-    window.addEventListener('mousemove', (e) => {
-      if (!this.dragging) return;
-      const dx = e.clientX - this.prevX;
-      const dy = e.clientY - this.prevY;
-      this.prevX = e.clientX;
-      this.prevY = e.clientY;
-      this.yaw -= dx * 0.005;
-      this.pitch = THREE.MathUtils.clamp(this.pitch - dy * 0.005, MIN_PITCH, MAX_PITCH);
+    document.addEventListener('mousemove', (e) => {
+      if (!document.pointerLockElement) return;
+      this.yaw -= e.movementX * 0.002;
+      this.pitch = THREE.MathUtils.clamp(
+        this.pitch + e.movementY * 0.002,
+        MIN_PITCH,
+        MAX_PITCH
+      );
     });
 
     domElement.addEventListener('contextmenu', (e) => e.preventDefault());

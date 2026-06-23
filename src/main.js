@@ -55,6 +55,48 @@ app.appendChild(dummyHud);
 const dummyLabel = document.getElementById('dummy-label');
 const dummyBarFill = document.getElementById('dummy-bar-fill');
 
+let paused = false;
+
+const pauseOverlay = document.createElement('div');
+pauseOverlay.id = 'pause-overlay';
+pauseOverlay.hidden = true;
+pauseOverlay.innerHTML = `
+  <h1 id="pause-title">PAUSED</h1>
+  <div id="pause-menu">
+    <button type="button" class="pause-option" id="pause-resume">RESUME</button>
+    <button type="button" class="pause-option" id="pause-quit">QUIT</button>
+  </div>
+`;
+app.appendChild(pauseOverlay);
+
+function pauseGame() {
+  if (paused) return;
+  paused = true;
+  pauseOverlay.hidden = false;
+  if (document.pointerLockElement) {
+    document.exitPointerLock();
+  }
+}
+
+function resumeGame() {
+  if (!paused) return;
+  paused = false;
+  pauseOverlay.hidden = true;
+  clock.getDelta();
+  document.body.requestPointerLock();
+}
+
+document.getElementById('pause-resume').addEventListener('click', resumeGame);
+document.getElementById('pause-quit').addEventListener('click', () => {
+  location.reload();
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Escape' && !paused) {
+    pauseGame();
+  }
+});
+
 const clock = new THREE.Clock();
 
 function onResize() {
@@ -66,6 +108,12 @@ window.addEventListener('resize', onResize);
 
 function animate() {
   requestAnimationFrame(animate);
+
+  if (paused) {
+    renderer.render(scene, camera);
+    return;
+  }
+
   const dt = Math.min(clock.getDelta(), 0.05);
 
   dummy.update(dt, colliders);
