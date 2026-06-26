@@ -323,3 +323,95 @@ export class Blink {
   }
 }
 
+const NOVA_COOLDOWN = 3.2;
+const NOVA_RADIUS = 7;
+const NOVA_DAMAGE = 28;
+const NOVA_KNOCK = 9;
+
+export class Nova {
+  constructor(scene, player, dummy, camCtrl = null) {
+    this.scene = scene;
+    this.player = player;
+    this.dummy = dummy;
+    this.camCtrl = camCtrl;
+    this.cooldown = 0;
+    this.cdFill = null;
+    this.cdLabel = null;
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'KeyR' && !e.repeat) this.tryCast();
+    });
+  }
+
+  initCooldownUI() {
+    if (this.cdFill) return;
+    const container = document.querySelector('#app');
+    const el = document.createElement('div');
+    el.id = 'nova-cooldown';
+    el.style.marginTop = '8px';
+    el.innerHTML = `
+      <div id="nova-cd-label">NOVA [R]</div>
+      <div id="nova-cd-track"><div id="nova-cd-fill"></div></div>
+    `;
+    if (container) container.appendChild(el);
+
+    this.cdFill = document.getElementById('nova-cd-fill');
+    this.cdLabel = document.getElementById('nova-cd-label');
+  }
+
+  tryCast() {
+    if (this.cooldown > 0) return;
+    this.cooldown = NOVA_COOLDOWN;
+
+    const pos = this.player.mesh.position.clone();
+    pos.y = 0.6;
+
+    // Expanding ring VFX
+    const ring = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.6, 0.6, 0.25, 32),
+      new THREE.MeshLambertMaterial({ color: 0x66ddff, transparent: true, opacity: 0.7 })
+    );
+    ring.position.copy(pos);
+    this.scene.add(ring);
+
+    const start = performance.now();
+    const dur = 0.55;
+    const ticker = () => {
+      const t = (performance.now() - start) / 1000 / dur;
+      if (t >= 1) {
+        this.scene.remove(ring);
+        ring.geometry.dispose();
+        ring.material.dispose();
+        return;
+      }
+      const r = NOVA_RADIUS * t;
+      ring.scale.set(r / 0.6, 1, r / 0.6);
+      ring.material.opacity = 0.75 * (1 - t * 0.9);
+      requestAnimationFrame(ticker);
+    };
+    ticker();
+
+    // Hit dummy?
+    const dPos = this.dummy.mesh.position;
+    const dist = Math.hypot(dPos.x - pos.x, dPos.z - pos.z);
+    if (dist < NOVA_RADIUS + 1.2) {
+      this.dummy.takeDamage(NOVA_DAMAGE);
+      this.dummy.knockup(NOVA_KNOCK);
+      if (this.camCtrl) this.camCtrl.addShake(1.1);
+    } else if (this.camCtrl) {
+      this.camCtrl.addShake(0.5);
+    }
+  }
+
+  update(dt) {
+    this.initCooldownUI();
+    this.cooldown = Math.max(0, this.cooldown - dt);
+    if (this.cdFill && this.cdLabel) {
+      const pct = this.cooldown > 0 ? (this.cooldown / NOVA_COOLDOWN) * 100 : 0;
+      this.cdFill.style.width = `${pct}%`;
+      this.cdLabel.textContent = this.cooldown > 0 ? `NOVA ${this.cooldown.toFixed(1)}s` : 'NOVA [R]';
+    }
+  }
+}
+
+

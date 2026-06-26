@@ -4,7 +4,7 @@ import { buildWorld } from './world.js';
 import { Player } from './player.js';
 import { CameraController } from './camera.js';
 import { Dummy } from './dummy.js';
-import { Fireball, Blink } from './spell.js';
+import { Fireball, Blink, Nova } from './spell.js';
 import { applyOutlines, ensureOutlines } from './outline.js';
 
 const app = document.querySelector('#app');
@@ -40,12 +40,13 @@ const player = new Player(scene, camCtrl);
 const dummy = new Dummy(scene);
 const fireball = new Fireball(scene, player, camera, dummy, colliders, camCtrl);
 const blink = new Blink(scene, player, camera, camCtrl);
+const nova = new Nova(scene, player, dummy, camCtrl);
 
 applyOutlines(scene);
 
 const hud = document.createElement('div');
 hud.id = 'hud';
-hud.innerHTML = 'WASD move · Double-tap dir to dash · Space (x2) jump/walljump · Q: Fireball · Mouse: aim/look · Click to lock pointer';
+hud.innerHTML = 'WASD · Double-tap dash · Space double-jump/wall · Q Fireball · E Blink · R Nova · Mouse aim · Esc pause';
 app.appendChild(hud);
 
 // Crosshair
@@ -131,6 +132,7 @@ function animate() {
   player.update(dt, camCtrl, [...colliders, dummy.collider]);
   fireball.update(dt);
   blink.update(dt);
+  nova.update(dt);
   camCtrl.update(player.mesh.position, dt);
 
   dummyLabel.textContent = `DUMMY ${Math.ceil(dummy.health)}/${dummy.maxHealth}`;

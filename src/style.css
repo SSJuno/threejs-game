@@ -114,6 +114,29 @@ canvas {
   transition: width 0.05s linear;
 }
 
+#nova-cd-label {
+  color: #aaddff;
+  font: 11px/1.4 system-ui, sans-serif;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  margin-bottom: 3px;
+}
+
+#nova-cd-track {
+  height: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(120, 200, 255, 0.3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+#nova-cd-fill {
+  height: 100%;
+  width: 0%;
+  background: #88eeff;
+  border-radius: 2px;
+  transition: width 0.05s linear;
+}
+
 #pause-overlay {
   position: fixed;
   inset: 0;
