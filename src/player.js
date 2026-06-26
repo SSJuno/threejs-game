@@ -259,7 +259,8 @@ export class Player {
 
     // Fall reset
     if (this.mesh.position.y < -8 && this.velocity.y < -5) {
-      this.mesh.position.set(0, 3.5, 0);
+      // Arena center reset (tuned for current map)
+      this.mesh.position.set(-1.5, 3.5, 0.5);
       this.mesh.rotation.set(0, 0, 0);
       this.velocity.set(0, 0, 0);
       this.jumpsLeft = 2;

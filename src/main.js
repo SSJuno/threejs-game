@@ -1,6 +1,6 @@
 import './style.css';
 import * as THREE from 'three';
-import { buildWorld } from './world.js';
+import { buildArena } from './arena.js';
 import { Player } from './player.js';
 import { CameraController } from './camera.js';
 import { Dummy } from './dummy.js';
@@ -34,10 +34,26 @@ sun.shadow.camera.top = 35;
 sun.shadow.camera.bottom = -35;
 scene.add(ambient, sun);
 
-const colliders = buildWorld(scene);
+// Build the new Gunz-style arena map
+const arena = buildArena(scene);
+const colliders = arena.colliders;
+
 const camCtrl = new CameraController(camera, renderer.domElement);
 const player = new Player(scene, camCtrl);
 const dummy = new Dummy(scene);
+
+// Apply map-specific spawns for easy swapping
+if (arena.playerStart) {
+  player.mesh.position.copy(arena.playerStart);
+}
+if (arena.dummyStart) {
+  dummy.mesh.position.copy(arena.dummyStart);
+  const ds = arena.dummyStart;
+  dummy.collider.x = ds.x;
+  dummy.collider.y = ds.y - 0.9; // DUMMY_H / 2
+  dummy.collider.z = ds.z;
+}
+
 const fireball = new Fireball(scene, player, camera, dummy, colliders, camCtrl);
 const blink = new Blink(scene, player, camera, camCtrl);
 const nova = new Nova(scene, player, dummy, camCtrl);
