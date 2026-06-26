@@ -198,13 +198,13 @@ export function buildArena(scene) {
   // === SECOND FLOOR - Battlements on the wall ===
   const upperY = 7.2;
 
-  // Left upper walkway (second floor)
-  box(8.5, 0.95, 4.2, STONE, -11.5, upperY - 0.1, wallBaseZ - 0.5);
-  addCollider(-11.5, upperY + 0.375, wallBaseZ - 0.5, 4.25, 0.375, 2.1);
+  // Left upper walkway (second floor) - thicker for solid feel
+  box(8.5, 1.1, 4.2, STONE, -11.5, upperY - 0.1, wallBaseZ - 0.5);
+  addCollider(-11.5, upperY + 0.55, wallBaseZ - 0.5, 4.25, 0.55, 2.1);
 
   // Right upper walkway
-  box(8.5, 0.95, 4.2, STONE, 11.5, upperY - 0.1, wallBaseZ - 0.5);
-  addCollider(11.5, upperY + 0.375, wallBaseZ - 0.5, 4.25, 0.375, 2.1);
+  box(8.5, 1.1, 4.2, STONE, 11.5, upperY - 0.1, wallBaseZ - 0.5);
+  addCollider(11.5, upperY + 0.55, wallBaseZ - 0.5, 4.25, 0.55, 2.1);
 
   // Battlements / crenellations (low walls on upper level)
   box(8.8, 1.4, 0.75, DARK_STONE, -11.5, upperY + 1.1, wallBaseZ - 2.3);
@@ -224,50 +224,52 @@ export function buildArena(scene) {
   const bridgeY = 7.6;
   const bridgeZ = wallBaseZ + 3;
 
-  // Bridge deck - narrow for exciting dashes and jumps
-  box(19, 0.75, 2.4, STONE, 0, bridgeY, bridgeZ);
-  addCollider(0, bridgeY + 0.375, bridgeZ, 9.5, 0.375, 1.2);
+  // Bridge deck - make it thicker for reliable walking
+  box(19, 1.1, 2.6, STONE, 0, bridgeY, bridgeZ);
+  addCollider(0, bridgeY + 0.55, bridgeZ, 9.5, 0.55, 1.3);
 
-  // Bridge side railings
-  box(19, 0.9, 0.45, DARK_STONE, 0, bridgeY + 1.05, bridgeZ - 1.35);
-  addCollider(0, bridgeY + 1.05 + 0.45, bridgeZ - 1.35, 9.5, 0.45, 0.225);
+  // Bridge side railings - taller and thicker for solid barriers (prevents falling through sides)
+  box(19, 1.4, 0.6, DARK_STONE, 0, bridgeY + 1.3, bridgeZ - 1.4);
+  addCollider(0, bridgeY + 1.3 + 0.7, bridgeZ - 1.4, 9.5, 0.7, 0.3);
 
-  box(19, 0.9, 0.45, DARK_STONE, 0, bridgeY + 1.05, bridgeZ + 1.35);
-  addCollider(0, bridgeY + 1.05 + 0.45, bridgeZ + 1.35, 9.5, 0.45, 0.225);
+  box(19, 1.4, 0.6, DARK_STONE, 0, bridgeY + 1.3, bridgeZ + 1.4);
+  addCollider(0, bridgeY + 1.3 + 0.7, bridgeZ + 1.4, 9.5, 0.7, 0.3);
 
-  // Small pillars on the bridge for cover / style
-  box(1.4, 2.2, 1.4, DARK_STONE, -5.5, bridgeY + 0.3, bridgeZ);
-  addCollider(-5.5, bridgeY + 0.3 + 1.1, bridgeZ, 0.7, 1.1, 0.7);
+  // Small pillars on the bridge for cover / style (also act as walls)
+  box(1.6, 2.4, 1.6, DARK_STONE, -5.5, bridgeY + 0.4, bridgeZ);
+  addCollider(-5.5, bridgeY + 0.4 + 1.2, bridgeZ, 0.8, 1.2, 0.8);
 
-  box(1.4, 2.2, 1.4, DARK_STONE, 5.5, bridgeY + 0.3, bridgeZ);
-  addCollider(5.5, bridgeY + 0.3 + 1.1, bridgeZ, 0.7, 1.1, 0.7);
+  box(1.6, 2.4, 1.6, DARK_STONE, 5.5, bridgeY + 0.4, bridgeZ);
+  addCollider(5.5, bridgeY + 0.4 + 1.2, bridgeZ, 0.8, 1.2, 0.8);
 
   // === STAIRS to reach the second floor (near the door) ===
   // Right side stairs (from courtyard up to upper level)
+  // More forgiving colliders + slight overlap so you don't fall through
   const stairStartX = 6.2;
   const stairStartZ = 18.5;
   for (let i = 0; i < 7; i++) {
-    const sh = 0.7;
-    const sw = 2.4;
-    const sd = 1.05;
+    const sh = 0.75;
+    const sw = 2.8;
+    const sd = 1.4;
     const sx = stairStartX;
-    const sy = i * sh * 0.95;
-    const sz = stairStartZ - i * 0.85;
+    const sy = i * (sh * 0.88);
+    const sz = stairStartZ - i * 0.78;
     box(sw, sh, sd, STONE, sx, sy, sz);
-    addCollider(sx, sy + sh / 2, sz, sw / 2, sh / 2, sd / 2);
+    // Generous collider for reliable stair climbing
+    addCollider(sx, sy + sh / 2 + 0.1, sz, sw / 2 + 0.2, sh / 2 + 0.15, sd / 2 + 0.2);
   }
 
   // Left side stairs
   const stairLeftX = -6.2;
   for (let i = 0; i < 7; i++) {
-    const sh = 0.7;
-    const sw = 2.4;
-    const sd = 1.05;
+    const sh = 0.75;
+    const sw = 2.8;
+    const sd = 1.4;
     const sx = stairLeftX;
-    const sy = i * sh * 0.95;
-    const sz = stairStartZ - i * 0.85;
+    const sy = i * (sh * 0.88);
+    const sz = stairStartZ - i * 0.78;
     box(sw, sh, sd, STONE, sx, sy, sz);
-    addCollider(sx, sy + sh / 2, sz, sw / 2, sh / 2, sd / 2);
+    addCollider(sx, sy + sh / 2 + 0.1, sz, sw / 2 + 0.2, sh / 2 + 0.15, sd / 2 + 0.2);
   }
 
   // Inner support pillars / columns in the castle area
@@ -276,6 +278,69 @@ export function buildArena(scene) {
 
   box(1.5, 7, 1.5, DARK_STONE, 4.5, 0, 26);
   addCollider(4.5, 3.5, 26, 0.75, 3.5, 0.75);
+
+  // =====================================================
+  // CLOSE THE CASTLE + SIDE EXIT + 3 EXTERNAL SIDE TOWERS
+  // =====================================================
+
+  // Side walls to close the inner castle area (makes it feel like a proper keep)
+  // West closing wall
+  box(3.2, 7.5, 12, STONE, -15.5, 0, 27);
+  addCollider(-15.5, 3.75, 27, 1.6, 3.75, 6);
+
+  // East closing wall (with a deliberate opening/gap to get out to the side towers)
+  // North segment of east wall
+  box(3.2, 7.5, 5, STONE, 15.5, 0, 24);
+  addCollider(15.5, 3.75, 24, 1.6, 3.75, 2.5);
+
+  // South segment of east wall (gap between this and the north segment)
+  box(3.2, 7.5, 5, STONE, 15.5, 0, 30);
+  addCollider(15.5, 3.75, 30, 1.6, 3.75, 2.5);
+
+  // The gap in the east wall is around x=15.5 , z~26-28 — this is the "opening to get out"
+
+  // Small low wall / lip on the inner side of the opening (visual cue + minor cover)
+  box(2.5, 1.2, 1.5, DARK_STONE, 14, 0, 27);
+  addCollider(14, 0.6, 27, 1.25, 0.6, 0.75);
+
+  // === THREE EXTERNAL SIDE TOWERS (outside the main arena) ===
+  // Player exits through the east opening and can fight on these towers.
+  // They are positioned outside the main enclosed area.
+
+  const extTowerH = 10.0;
+
+  // Side Tower 1 (closest to the exit, slightly forward)
+  box(4.8, extTowerH, 4.8, STONE, 22, 0, 26);
+  addCollider(22, extTowerH / 2, 26, 2.4, extTowerH / 2, 2.4);
+  // Top platform (fightable surface)
+  box(5.4, 1.0, 5.4, DARK_STONE, 22, extTowerH - 0.3, 26);
+  addCollider(22, extTowerH - 0.3 + 0.5, 26, 2.7, 0.5, 2.7);
+
+  // Side Tower 2 (further out, angled)
+  box(4.5, extTowerH + 1.5, 4.5, STONE, 27, 0, 31);
+  addCollider(27, (extTowerH + 1.5) / 2, 31, 2.25, (extTowerH + 1.5) / 2, 2.25);
+  box(5.2, 1.0, 5.2, DARK_STONE, 27, extTowerH + 1.2, 31);
+  addCollider(27, extTowerH + 1.2 + 0.5, 31, 2.6, 0.5, 2.6);
+
+  // Side Tower 3 (more to the side, creates a triangle for fighting between them)
+  box(4.2, extTowerH, 4.2, STONE, 20, 0, 35);
+  addCollider(20, extTowerH / 2, 35, 2.1, extTowerH / 2, 2.1);
+  box(4.8, 1.0, 4.8, DARK_STONE, 20, extTowerH - 0.3, 35);
+  addCollider(20, extTowerH - 0.3 + 0.5, 35, 2.4, 0.5, 2.4);
+
+  // Small low barriers near the external towers for cover while fighting
+  box(2.8, 1.3, 1.2, STONE, 19, 0, 29);
+  addCollider(19, 0.65, 29, 1.4, 0.65, 0.6);
+
+  box(1.2, 1.3, 2.8, STONE, 25, 0, 33);
+  addCollider(25, 0.65, 33, 0.6, 0.65, 1.4);
+
+  // Some scattered rubble outside near the opening for parkour to the towers
+  box(1.8, 0.6, 2.2, DARK_STONE, 17.5, 0, 28);
+  addCollider(17.5, 0.3, 28, 0.9, 0.3, 1.1);
+
+  box(2.2, 0.5, 1.6, STONE, 18.5, 0, 32);
+  addCollider(18.5, 0.25, 32, 1.1, 0.25, 0.8);
 
   // Some upper-level cover elements near the bridge
   box(2, 1.9, 2, STONE, -8, upperY + 0.6, wallBaseZ + 1);

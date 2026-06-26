@@ -338,15 +338,17 @@ export class Player {
       if (dx > c.hw + PLAYER_R || dz > c.hd + PLAYER_R) continue;
 
       const top = c.y + c.hh;
-      const snap = (this.dashTimer > 0 || Math.abs(this.velocity.y) < 6) ? 0.55 : 0.3;
-      if (this.velocity.y <= 0 && feet <= top + snap && feet >= top - snap) {
+      // Much more forgiving snap for stairs, bridges, and upper platforms
+      // This fixes going through thin/raised structures
+      const snap = this.dashTimer > 0 ? 1.2 : (Math.abs(this.velocity.y) < 8 ? 0.9 : 0.5);
+      if (feet <= top + snap && feet >= top - snap) {
         if (top > bestY) bestY = top;
       }
     }
 
     if (bestY > -Infinity) {
       pos.y = bestY + PLAYER_H;
-      this.velocity.y = 0;
+      this.velocity.y = Math.min(this.velocity.y, 0); // don't boost upward
       this.onGround = true;
       this.jumpsLeft = 2;
     } else {
