@@ -34,7 +34,9 @@ sun.shadow.camera.top = 35;
 sun.shadow.camera.bottom = -35;
 scene.add(ambient, sun);
 
-// Build the new Gunz-style arena map
+// === MAP SELECTION (easy to swap) ===
+// To use the old courtyard: import { buildWorld } from './world.js'; then const colliders = buildWorld(scene);
+// Current:
 const arena = buildArena(scene);
 const colliders = arena.colliders;
 
@@ -126,7 +128,20 @@ document.getElementById('pause-quit').addEventListener('click', () => {
 });
 
 window.addEventListener('keydown', (e) => {
-  if (e.code === 'Escape' && !paused) {
+  if (e.code === 'Escape') {
+    e.preventDefault();
+    if (paused) {
+      resumeGame();
+    } else {
+      pauseGame();
+    }
+  }
+});
+
+// Catch browser-initiated pointer lock exit (e.g. pressing ESC while locked)
+// so the pause menu opens on a single ESC press.
+document.addEventListener('pointerlockchange', () => {
+  if (!document.pointerLockElement && !paused) {
     pauseGame();
   }
 });

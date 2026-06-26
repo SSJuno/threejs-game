@@ -28,29 +28,29 @@ export function buildArena(scene) {
     colliders.push({ x, y, z, hw, hh, hd });
   }
 
-  // === MAIN FLOOR (compact 26x28) ===
-  box(26, 0.6, 28, FLOOR, 0, -0.3, 0);
-  addCollider(0, 0, 0, 13, 0.3, 14);
+  // === MAIN FLOOR (larger ~40x46) ===
+  box(40, 0.6, 46, FLOOR, 0, -0.3, 0);
+  addCollider(0, 0, 0, 20, 0.3, 23);
 
   // === HEIGHT VARIATION - raised platforms for parkour ===
-  // Left raised platform
-  box(5.2, 1.15, 5.8, 0x4a5540, -7.5, 0.575, -2);
-  addCollider(-7.5, 0.575 + 0.575, -2, 2.6, 0.575, 2.9);
+  // Left raised platform (bigger)
+  box(7.5, 1.2, 8, 0x4a5540, -11.5, 0.6, -3);
+  addCollider(-11.5, 0.6 + 0.6, -3, 3.75, 0.6, 4);
 
   // Right rear platform
-  box(4.8, 1.35, 4.6, 0x4a5540, 7.2, 0.675, -6.2);
-  addCollider(7.2, 0.675 + 0.675, -6.2, 2.4, 0.675, 2.3);
+  box(6.5, 1.4, 6.5, 0x4a5540, 11, 0.7, -9.5);
+  addCollider(11, 0.7 + 0.7, -9.5, 3.25, 0.7, 3.25);
 
-  // Small forward step / ledge
-  box(3.4, 0.85, 3.4, 0x515151, -0.5, 0.425, 8.5);
-  addCollider(-0.5, 0.425 + 0.425, 8.5, 1.7, 0.425, 1.7);
+  // Forward step / ledge (bigger)
+  box(4.5, 0.9, 4.5, 0x515151, -0.8, 0.45, 13);
+  addCollider(-0.8, 0.45 + 0.45, 13, 2.25, 0.45, 2.25);
 
-  // === INTACT TALL PILLARS (wall-jump / cover targets) ===
+  // === INTACT TALL PILLARS (wall-jump / cover targets) - spread out ===
   const intact = [
-    { x: -8.5, z: -7.2, h: 10.2, w: 1.95 },
-    { x: 8.0,  z: -6.0, h: 9.4,  w: 2.05 },
-    { x: -7.8, z: 6.8,  h: 10.8, w: 1.9  },
-    { x: 7.0,  z: 7.5,  h: 8.6,  w: 2.1  },
+    { x: -13.5, z: -11,  h: 11.5, w: 2.1 },
+    { x: 12.5,  z: -9.5, h: 10.5, w: 2.2 },
+    { x: -12.2, z: 10.5, h: 12,   w: 2.05 },
+    { x: 11,    z: 11.5, h: 9.8,  w: 2.15 },
   ];
   for (const p of intact) {
     box(p.w, p.h, p.w, STONE, p.x, 0, p.z);
@@ -59,75 +59,76 @@ export function buildArena(scene) {
     box(p.w * 1.12, 0.48, p.w * 1.12, MOSS, p.x, p.h - 0.05, p.z);
   }
 
-  // === BROKEN / COLLAPSED PILLARS ===
-  // Broken pillar 1 (west, near center)
-  box(2.05, 3.4, 2.05, DARK_STONE, -2.8, 0, 0.8);
-  addCollider(-2.8, 1.7, 0.8, 1.025, 1.7, 1.025);
+  // === BROKEN / COLLAPSED PILLARS (spread for larger map) ===
+  // Broken pillar 1 (west-central)
+  box(2.1, 3.6, 2.1, DARK_STONE, -4.2, 0, 1.2);
+  addCollider(-4.2, 1.8, 1.2, 1.05, 1.8, 1.05);
 
-  const bp1Top = box(2.25, 1.7, 2.1, STONE, -2.2, 4.1, 1.4);
+  const bp1Top = box(2.3, 1.8, 2.15, STONE, -3.4, 4.3, 2);
   bp1Top.rotation.set(0.55, 0.25, -0.7);
-  addCollider(-2.2, 4.1 + 0.85, 1.4, 1.1, 0.85, 1.05);
+  addCollider(-3.4, 4.3 + 0.9, 2, 1.12, 0.9, 1.08);
 
-  box(1.3, 0.55, 1.5, DARK_STONE, -4.2, 0, 1.6);
-  addCollider(-4.2, 0.275, 1.6, 0.65, 0.275, 0.75);
-  box(1.1, 0.8, 1.35, STONE, -1.6, 0, -0.4);
-  addCollider(-1.6, 0.4, -0.4, 0.55, 0.4, 0.675);
+  box(1.35, 0.6, 1.55, DARK_STONE, -6.2, 0, 2.2);
+  addCollider(-6.2, 0.3, 2.2, 0.675, 0.3, 0.775);
+  box(1.15, 0.85, 1.4, STONE, -2.5, 0, -0.6);
+  addCollider(-2.5, 0.425, -0.6, 0.575, 0.425, 0.7);
 
   // Broken pillar 2 (east)
-  box(1.85, 2.8, 1.85, DARK_STONE, 4.5, 0, 3.2);
-  addCollider(4.5, 1.4, 3.2, 0.925, 1.4, 0.925);
+  box(1.95, 3.0, 1.95, DARK_STONE, 7, 0, 4.8);
+  addCollider(7, 1.5, 4.8, 0.975, 1.5, 0.975);
 
-  const bp2Top = box(2.1, 1.5, 1.95, STONE, 5.6, 3.0, 3.8);
+  const bp2Top = box(2.2, 1.6, 2.0, STONE, 8.8, 3.2, 5.5);
   bp2Top.rotation.set(-0.3, 0.8, 1.0);
-  addCollider(5.6, 3.0 + 0.75, 3.8, 1.0, 0.75, 0.95);
+  addCollider(8.8, 3.2 + 0.8, 5.5, 1.05, 0.8, 1.0);
 
-  box(1.45, 0.5, 1.6, DARK_STONE, 3.6, 0, 2.0);
-  addCollider(3.6, 0.25, 2.0, 0.725, 0.25, 0.8);
+  box(1.5, 0.55, 1.65, DARK_STONE, 5.5, 0, 3.0);
+  addCollider(5.5, 0.275, 3.0, 0.75, 0.275, 0.825);
 
   // Broken pillar 3 (south, more destroyed)
-  box(2.0, 4.2, 2.0, STONE, 0.5, 0, -8.8);
-  addCollider(0.5, 2.1, -8.8, 1.0, 2.1, 1.0);
+  box(2.1, 4.5, 2.1, STONE, 1, 0, -13.5);
+  addCollider(1, 2.25, -13.5, 1.05, 2.25, 1.05);
 
-  const bp3Fallen = box(2.15, 1.55, 2.3, DARK_STONE, 2.4, 0.4, -7.8);
+  const bp3Fallen = box(2.25, 1.65, 2.4, DARK_STONE, 3.8, 0.45, -12);
   bp3Fallen.rotation.set(0.15, -0.1, 1.25);
-  addCollider(2.4, 0.4 + 0.775, -7.8, 1.05, 0.775, 1.15);
+  addCollider(3.8, 0.45 + 0.825, -12, 1.1, 0.825, 1.2);
 
-  box(1.2, 0.65, 1.8, STONE, -1.4, 0, -7.2);
-  addCollider(-1.4, 0.325, -7.2, 0.6, 0.325, 0.9);
+  box(1.3, 0.7, 1.9, STONE, -2.2, 0, -11.2);
+  addCollider(-2.2, 0.35, -11.2, 0.65, 0.35, 0.95);
 
-  // === CHOKE POINTS + COVER (low walls) ===
-  // Vertical divider wall (creates left/right paths + choke)
-  box(1.35, 2.15, 9.5, STONE, -1.6, 0, 0.2);
-  addCollider(-1.6, 1.075, 0.2, 0.675, 1.075, 4.75);
+  // === CHOKE POINTS + COVER (low walls) - scaled for bigger arena ===
+  // Vertical divider wall (longer, creates left/right paths + choke)
+  box(1.5, 2.3, 14, STONE, -2.5, 0, 0.3);
+  addCollider(-2.5, 1.15, 0.3, 0.75, 1.15, 7);
 
   // Horizontal cover wall (right side choke)
-  box(6.5, 1.65, 1.25, DARK_STONE, 4.8, 0, -1.8);
-  addCollider(4.8, 0.825, -1.8, 3.25, 0.825, 0.625);
+  box(9.5, 1.8, 1.4, DARK_STONE, 7.5, 0, -2.8);
+  addCollider(7.5, 0.9, -2.8, 4.75, 0.9, 0.7);
 
-  // Left perimeter cover
-  box(1.2, 1.55, 4.2, STONE, -10.8, 0, -0.5);
-  addCollider(-10.8, 0.775, -0.5, 0.6, 0.775, 2.1);
+  // Left perimeter cover (farther out)
+  box(1.35, 1.7, 5.5, STONE, -16.5, 0, -0.8);
+  addCollider(-16.5, 0.85, -0.8, 0.675, 0.85, 2.75);
 
-  // Small forward barrier
-  box(3.8, 1.4, 1.15, STONE, 0.8, 0, 5.6);
-  addCollider(0.8, 0.7, 5.6, 1.9, 0.7, 0.575);
+  // Forward barrier / choke
+  box(5, 1.5, 1.3, STONE, 1.2, 0, 8.5);
+  addCollider(1.2, 0.75, 8.5, 2.5, 0.75, 0.65);
 
-  // === PARKOUR STEPS + SCATTERED DEBRIS ===
+  // === PARKOUR STEPS + SCATTERED DEBRIS (larger map) ===
   // Climbable blocks
-  box(2.1, 0.95, 2.0, 0x484848, -5.8, 0, 5.5);
-  addCollider(-5.8, 0.475, 5.5, 1.05, 0.475, 1.0);
+  box(2.8, 1.0, 2.6, 0x484848, -9, 0, 8.2);
+  addCollider(-9, 0.5, 8.2, 1.4, 0.5, 1.3);
 
-  box(1.7, 1.25, 1.9, 0x484848, 6.5, 0, 5.0);
-  addCollider(6.5, 0.625, 5.0, 0.85, 0.625, 0.95);
+  box(2.2, 1.35, 2.4, 0x484848, 10, 0, 7.5);
+  addCollider(10, 0.675, 7.5, 1.1, 0.675, 1.2);
 
   // Scattered rubble / small cover (all collidable)
   const rubble = [
-    { w: 1.0, h: 0.45, d: 1.15, x: -4.2, y: 0, z: -4.0 },
-    { w: 1.25, h: 0.38, d: 0.75, x: 5.5, y: 0, z: 0.5 },
-    { w: 0.75, h: 0.65, d: 0.95, x: -0.8, y: 0, z: -3.2 },
-    { w: 1.05, h: 0.42, d: 1.3, x: 3.0, y: 0, z: -8.5 },
-    { w: 0.9,  h: 0.55, d: 0.85, x: -9.0, y: 0, z: 3.8 },
-    { w: 1.35, h: 0.32, d: 0.9,  x: 9.2, y: 0, z: 4.2 },
+    { w: 1.2, h: 0.5,  d: 1.35, x: -6.5, y: 0, z: -6.2 },
+    { w: 1.5, h: 0.42, d: 0.9,  x: 8.5,  y: 0, z: 1.0 },
+    { w: 0.9, h: 0.7,  d: 1.1,  x: -1.2, y: 0, z: -4.8 },
+    { w: 1.25,h: 0.48, d: 1.55, x: 4.5,  y: 0, z: -13 },
+    { w: 1.1, h: 0.6,  d: 1.0,  x: -14,  y: 0, z: 5.5 },
+    { w: 1.6, h: 0.38, d: 1.1,  x: 14,   y: 0, z: 6.5 },
+    { w: 1.0, h: 0.55, d: 1.3,  x: 2,    y: 0, z: 2.5 },
   ];
   for (const r of rubble) {
     const m = box(r.w, r.h, r.d, DARK_STONE, r.x, r.y, r.z);
@@ -136,11 +137,11 @@ export function buildArena(scene) {
   }
 
   // A couple larger edge piles
-  box(2.6, 0.7, 1.3, DARK_STONE, -8.5, 0, -10.5);
-  addCollider(-8.5, 0.35, -10.5, 1.3, 0.35, 0.65);
+  box(3.2, 0.75, 1.6, DARK_STONE, -13, 0, -16);
+  addCollider(-13, 0.375, -16, 1.6, 0.375, 0.8);
 
-  box(1.4, 1.0, 2.1, STONE, 10.5, 0, -3.5);
-  addCollider(10.5, 0.5, -3.5, 0.7, 0.5, 1.05);
+  box(1.7, 1.1, 2.6, STONE, 15.5, 0, -5.5);
+  addCollider(15.5, 0.55, -5.5, 0.85, 0.55, 1.3);
 
   scene.add(group);
 
@@ -151,8 +152,8 @@ export function buildArena(scene) {
 
   return {
     colliders,
-    // Good starting positions for fast movement testing
-    playerStart: new THREE.Vector3(-6.5, 2.1, -8.5),
-    dummyStart: new THREE.Vector3(4.5, 2.0, 5.0),
+    // Good starting positions for the larger arena
+    playerStart: new THREE.Vector3(-10, 2.1, -13),
+    dummyStart: new THREE.Vector3(7, 2.0, 8),
   };
 }

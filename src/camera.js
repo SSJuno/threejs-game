@@ -19,8 +19,6 @@ export class CameraController {
       document.body.requestPointerLock();
     });
 
-    document.addEventListener('pointerlockchange', () => {});
-
     document.addEventListener('mousemove', (e) => {
       if (!document.pointerLockElement) return;
       this.yaw -= e.movementX * 0.002;
