@@ -1,20 +1,26 @@
 import * as THREE from 'three';
 import { createGradientMap } from './world.js';
 
-const MOVE_SPEED = 12;
-const ACCEL = 80;
-const DASH_SPEED = 28;
-const DASH_DURATION = 0.18;
-const GLIDE_DECAY = 0.3;
-const DOUBLE_TAP_MS = 280;
-const JUMP_FORCE = 10;
-const GRAVITY = -28;
+const MOVE_SPEED = 13;
+const ACCEL_GROUND = 95;
+const ACCEL_AIR = 42;
+const GROUND_FRICTION = 18;
+const AIR_DRAG = 1.2;
+const MAX_GROUND_SPEED = 15;
+const MAX_AIR_SPEED = 22;
+const DASH_SPEED = 30;
+const DASH_DURATION = 0.16;
+const DASH_COOLDOWN = 0.35;
+const GLIDE_DECAY = 0.22;
+const DOUBLE_TAP_MS = 260;
+const JUMP_FORCE = 11;
+const GRAVITY = -32;
 const PLAYER_H = 1.8;
-const PLAYER_R = 0.35;
-const TRAIL_FADE = 0.3;
-const TRAIL_OPACITY = 0.4;
-const WALL_JUMP_COOLDOWN = 0.3;
-const WALL_SLIDE_SPEED = -4;
+const PLAYER_R = 0.38;
+const TRAIL_FADE = 0.28;
+const TRAIL_OPACITY = 0.45;
+const WALL_JUMP_COOLDOWN = 0.28;
+const WALL_SLIDE_SPEED = -5;
 
 export class Player {
   constructor(scene) {
@@ -28,6 +34,7 @@ export class Player {
     this.wallJumpCooldown = 0;
     this.jumpsLeft = 2;
     this.dashTimer = 0;
+    this.dashCooldown = 0;
     this.glideTimer = 0;
     this.dashDir = new THREE.Vector3();
     this.keys = {};
@@ -113,6 +120,10 @@ export class Player {
 
     if (!down) {
       this.keys[k] = false;
+      if (k === 'Space' && this.velocity.y > 4) {
+        // Variable jump: cut upward velocity on release
+        this.velocity.y *= 0.48;
+      }
       return;
     }
 
@@ -132,8 +143,8 @@ export class Player {
         this.jumpsLeft--;
         this.onGround = false;
       } else if (this.isTouchingWall && this.wallJumpCooldown <= 0) {
-        this.velocity.x = this.wallNormal.x * JUMP_FORCE;
-        this.velocity.z = this.wallNormal.z * JUMP_FORCE;
+        this.velocity.x = this.wallNormal.x * JUMP_FORCE * 0.9;
+        this.velocity.z = this.wallNormal.z * JUMP_FORCE * 0.9;
         this.velocity.y = JUMP_FORCE;
         this.jumpsLeft = 1;
         this.wallJumpCooldown = WALL_JUMP_COOLDOWN;
@@ -143,10 +154,11 @@ export class Player {
   }
 
   startDash(dir) {
-    if (this.dashTimer > 0) return;
+    if (this.dashTimer > 0 || this.dashCooldown > 0) return;
     this.dashTimer = DASH_DURATION;
+    this.dashCooldown = DASH_COOLDOWN;
     this.glideTimer = 0;
-    this.velocity.y = 3;
+    this.velocity.y = Math.max(this.velocity.y, 4); // slight vertical pop
     const dirs = {
       w: new THREE.Vector3(0, 0, -1),
       s: new THREE.Vector3(0, 0, 1),
@@ -158,6 +170,7 @@ export class Player {
 
   update(dt, camera, colliders) {
     this.wallJumpCooldown = Math.max(0, this.wallJumpCooldown - dt);
+    this.dashCooldown = Math.max(0, this.dashCooldown - dt);
 
     if (this.isTouchingWall && !this.onGround) {
       this.velocity.y = Math.max(this.velocity.y, WALL_SLIDE_SPEED);
@@ -174,6 +187,8 @@ export class Player {
 
     const targetVx = input.x * MOVE_SPEED;
     const targetVz = input.z * MOVE_SPEED;
+    const onGround = this.onGround;
+    const accel = onGround ? ACCEL_GROUND : ACCEL_AIR;
 
     if (this.dashTimer > 0) {
       this.dashTimer -= dt;
@@ -181,7 +196,7 @@ export class Player {
         .addScaledVector(fwd, -this.dashDir.z)
         .addScaledVector(right, this.dashDir.x);
       worldDash.y = 0;
-      worldDash.normalize();
+      if (worldDash.lengthSq() > 0.0001) worldDash.normalize();
       this.velocity.x = worldDash.x * DASH_SPEED;
       this.velocity.z = worldDash.z * DASH_SPEED;
       if (this.dashTimer <= 0) this.glideTimer = GLIDE_DECAY;
@@ -190,28 +205,60 @@ export class Player {
       const t = dt / GLIDE_DECAY;
       this.velocity.x = THREE.MathUtils.lerp(this.velocity.x, targetVx, t);
       this.velocity.z = THREE.MathUtils.lerp(this.velocity.z, targetVz, t);
+    } else if (onGround) {
+      // Ground: strong accel + friction when no input
+      const t = 1 - Math.exp(-accel * dt);
+      if (input.lengthSq() > 0) {
+        this.velocity.x = THREE.MathUtils.lerp(this.velocity.x, targetVx, t);
+        this.velocity.z = THREE.MathUtils.lerp(this.velocity.z, targetVz, t);
+      } else {
+        const fric = 1 - Math.exp(-GROUND_FRICTION * dt);
+        this.velocity.x = THREE.MathUtils.lerp(this.velocity.x, 0, fric);
+        this.velocity.z = THREE.MathUtils.lerp(this.velocity.z, 0, fric);
+      }
     } else {
-      const t = 1 - Math.exp(-ACCEL * dt);
+      // Air control
+      const t = 1 - Math.exp(-accel * dt);
       this.velocity.x = THREE.MathUtils.lerp(this.velocity.x, targetVx, t);
       this.velocity.z = THREE.MathUtils.lerp(this.velocity.z, targetVz, t);
+      // light air drag
+      const dragT = 1 - Math.exp(-AIR_DRAG * dt);
+      this.velocity.x = THREE.MathUtils.lerp(this.velocity.x, this.velocity.x * 0.98, dragT);
+      this.velocity.z = THREE.MathUtils.lerp(this.velocity.z, this.velocity.z * 0.98, dragT);
+    }
+
+    // Speed caps (after input/dash)
+    let horiz = Math.hypot(this.velocity.x, this.velocity.z);
+    const maxH = onGround ? MAX_GROUND_SPEED : MAX_AIR_SPEED;
+    if (horiz > maxH) {
+      const s = maxH / horiz;
+      this.velocity.x *= s;
+      this.velocity.z *= s;
     }
 
     this.velocity.y += GRAVITY * dt;
+
+    // Apply movement
     this.mesh.position.x += this.velocity.x * dt;
     this.mesh.position.y += this.velocity.y * dt;
     this.mesh.position.z += this.velocity.z * dt;
 
     this.resolveCollision(colliders);
 
+    // Face movement dir
     const horizSpeed = Math.hypot(this.velocity.x, this.velocity.z);
-    if (horizSpeed > 0.5) {
+    if (horizSpeed > 0.6) {
       this.mesh.rotation.y = Math.atan2(this.velocity.x, this.velocity.z);
     }
 
+    // Fall reset
     if (this.mesh.position.y < -8 && this.velocity.y < -5) {
-      this.mesh.position.set(0, 3, 0);
+      this.mesh.position.set(0, 3.5, 0);
       this.velocity.set(0, 0, 0);
       this.jumpsLeft = 2;
+      this.dashTimer = 0;
+      this.dashCooldown = 0;
+      this.glideTimer = 0;
     }
 
     if (this.dashTimer > 0) this.spawnTrail();
@@ -263,11 +310,11 @@ export class Player {
         if (overlapX <= overlapZ) {
           this.wallNormal.set(pos.x >= c.x ? 1 : -1, 0, 0);
           pos.x += pos.x > c.x ? overlapX : -overlapX;
-          this.velocity.x = 0;
+          if (this.dashTimer <= 0) this.velocity.x = 0;
         } else {
           this.wallNormal.set(0, 0, pos.z >= c.z ? 1 : -1);
           pos.z += pos.z > c.z ? overlapZ : -overlapZ;
-          this.velocity.z = 0;
+          if (this.dashTimer <= 0) this.velocity.z = 0;
         }
         wallContact = true;
       }
@@ -283,7 +330,8 @@ export class Player {
       if (dx > c.hw + PLAYER_R || dz > c.hd + PLAYER_R) continue;
 
       const top = c.y + c.hh;
-      if (this.velocity.y <= 0 && feet <= top + 0.3 && feet >= top - 0.3) {
+      const snap = (this.dashTimer > 0 || Math.abs(this.velocity.y) < 6) ? 0.55 : 0.3;
+      if (this.velocity.y <= 0 && feet <= top + snap && feet >= top - snap) {
         if (top > bestY) bestY = top;
       }
     }

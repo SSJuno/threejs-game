@@ -38,14 +38,20 @@ const colliders = buildWorld(scene);
 const player = new Player(scene);
 const dummy = new Dummy(scene);
 const camCtrl = new CameraController(camera, renderer.domElement);
-const fireball = new Fireball(scene, player, camera, dummy);
+const fireball = new Fireball(scene, player, camera, dummy, colliders);
 
 applyOutlines(scene);
 
 const hud = document.createElement('div');
 hud.id = 'hud';
-hud.innerHTML = 'WASD move · Double-tap direction to dash · Space jump (x2) · Drag mouse to rotate camera';
+hud.innerHTML = 'WASD move · Double-tap dir to dash · Space (x2) jump/walljump · Q: Fireball · Mouse: aim/look · Click to lock pointer';
 app.appendChild(hud);
+
+// Crosshair
+const crosshair = document.createElement('div');
+crosshair.id = 'crosshair';
+crosshair.innerHTML = '<div class="dot"></div>';
+app.appendChild(crosshair);
 
 const dummyHud = document.createElement('div');
 dummyHud.id = 'dummy-hud';

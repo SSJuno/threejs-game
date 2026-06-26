@@ -13,11 +13,12 @@ const EXPLOSION_DURATION = 0.4;
 const EXPLOSION_MAX = 3.0;
 
 export class Fireball {
-  constructor(scene, player, camera, dummy) {
+  constructor(scene, player, camera, dummy, worldColliders = []) {
     this.scene = scene;
     this.player = player;
     this.camera = camera;
     this.dummy = dummy;
+    this.worldColliders = worldColliders;
     this.cooldown = 0;
     this.projectile = null;
     this.explosions = [];
@@ -134,6 +135,13 @@ export class Fireball {
     fb.mesh.position.addScaledVector(fb.dir, step);
     fb.traveled += step;
 
+    // World collision
+    if (this.checkWorldHit(fb.mesh.position)) {
+      this.spawnExplosion(fb.mesh.position.clone());
+      this.removeProjectile();
+      return;
+    }
+
     const dPos = this.dummy.mesh.position;
     if (fb.mesh.position.distanceTo(dPos) < IMPACT_DIST) {
       this.onImpact(fb.mesh.position.clone());
@@ -143,6 +151,19 @@ export class Fireball {
     if (fb.traveled >= MAX_RANGE) {
       this.removeProjectile();
     }
+  }
+
+  checkWorldHit(pos) {
+    const r = 0.45;
+    for (const c of this.worldColliders) {
+      const dx = Math.abs(pos.x - c.x);
+      const dz = Math.abs(pos.z - c.z);
+      const dy = Math.abs(pos.y - c.y);
+      if (dx < c.hw + r && dz < c.hd + r && dy < c.hh + r) {
+        return true;
+      }
+    }
+    return false;
   }
 
   onImpact(point) {
