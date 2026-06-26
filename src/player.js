@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createGradientMap } from './world.js';
 
 const MOVE_SPEED = 12;
 const ACCEL = 80;
@@ -31,21 +32,74 @@ export class Player {
     this.dashDir = new THREE.Vector3();
     this.keys = {};
     this.lastTap = { w: 0, a: 0, s: 0, d: 0 };
+    this.cloakColor = 0x2233aa;
+    this.hatColor = 0x111122;
 
+    const gradientMap = createGradientMap();
     this.mesh = new THREE.Group();
+
     const body = new THREE.Mesh(
-      new THREE.BoxGeometry(0.7, 1.0, 0.4),
-      new THREE.MeshLambertMaterial({ color: 0x4488cc })
+      new THREE.CylinderGeometry(0.38, 0.28, 0.85, 6),
+      new THREE.MeshToonMaterial({ color: this.cloakColor, gradientMap })
     );
-    body.position.y = -1.3;
+    body.position.y = -1.375;
     body.castShadow = true;
+
     const head = new THREE.Mesh(
-      new THREE.BoxGeometry(0.45, 0.45, 0.45),
-      new THREE.MeshLambertMaterial({ color: 0x6699dd })
+      new THREE.BoxGeometry(0.36, 0.34, 0.32),
+      new THREE.MeshToonMaterial({ color: 0xffcc99, gradientMap })
     );
-    head.position.y = -0.5;
+    head.position.y = -0.55;
     head.castShadow = true;
-    this.mesh.add(body, head);
+
+    const eyeMat = new THREE.MeshToonMaterial({ color: 0x111111, gradientMap });
+    const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 6), eyeMat);
+    eyeL.position.set(-0.08, -0.52, 0.15);
+    const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 6), eyeMat);
+    eyeR.position.set(0.08, -0.52, 0.15);
+
+    const brim = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.34, 0.34, 0.07, 10),
+      new THREE.MeshToonMaterial({ color: this.hatColor, gradientMap })
+    );
+    brim.position.y = -0.36;
+    brim.castShadow = true;
+
+    const hat = new THREE.Mesh(
+      new THREE.ConeGeometry(0.24, 0.6, 8),
+      new THREE.MeshToonMaterial({ color: this.hatColor, gradientMap })
+    );
+    hat.position.y = -0.02;
+    hat.castShadow = true;
+
+    const cloakMat = new THREE.MeshToonMaterial({
+      color: this.cloakColor,
+      gradientMap,
+      transparent: true,
+      opacity: 0.82,
+      side: THREE.DoubleSide,
+    });
+
+    const cloakGeo = new THREE.PlaneGeometry(0.4, 0.95, 1, 4);
+    const cPos = cloakGeo.attributes.position;
+    for (let i = 0; i < cPos.count; i++) {
+      const y = cPos.getY(i);
+      if (y < 0) {
+        const t = (y + 0.475) / 0.475;
+        cPos.setX(i, cPos.getX(i) * (0.35 + 0.65 * t));
+      }
+    }
+    cloakGeo.computeVertexNormals();
+
+    const cloakL = new THREE.Mesh(cloakGeo, cloakMat);
+    cloakL.position.set(-0.3, -1.15, -0.06);
+    cloakL.rotation.set(0.12, 0.35, 0);
+
+    const cloakR = new THREE.Mesh(cloakGeo.clone(), cloakMat);
+    cloakR.position.set(0.3, -1.15, -0.06);
+    cloakR.rotation.set(0.12, -0.35, 0);
+
+    this.mesh.add(body, head, eyeL, eyeR, brim, hat, cloakL, cloakR);
     this.mesh.position.set(0, 2, 0);
     scene.add(this.mesh);
 

@@ -5,10 +5,29 @@ const DARK_STONE = 0x4a4a4a;
 const MOSS = 0x5a6b4a;
 const FLOOR = 0x3d3d3d;
 
+export function createGradientMap() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 4;
+  canvas.height = 1;
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 4, 0);
+  grad.addColorStop(0, '#333333');
+  grad.addColorStop(0.45, '#888888');
+  grad.addColorStop(1, '#ffffff');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 4, 1);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.minFilter = THREE.NearestFilter;
+  tex.magFilter = THREE.NearestFilter;
+  return tex;
+}
+
+const gradientMap = createGradientMap();
+
 function box(w, h, d, color, x, y, z, rx = 0, ry = 0) {
   const mesh = new THREE.Mesh(
     new THREE.BoxGeometry(w, h, d),
-    new THREE.MeshLambertMaterial({ color })
+    new THREE.MeshToonMaterial({ color, gradientMap })
   );
   mesh.position.set(x, y + h / 2, z);
   mesh.rotation.set(rx, ry, 0);

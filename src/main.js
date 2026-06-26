@@ -5,6 +5,7 @@ import { Player } from './player.js';
 import { CameraController } from './camera.js';
 import { Dummy } from './dummy.js';
 import { Fireball } from './spell.js';
+import { applyOutlines, ensureOutlines } from './outline.js';
 
 const app = document.querySelector('#app');
 
@@ -20,8 +21,8 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 app.appendChild(renderer.domElement);
 
-const ambient = new THREE.AmbientLight(0x8899aa, 0.6);
-const sun = new THREE.DirectionalLight(0xffeedd, 1.2);
+const ambient = new THREE.AmbientLight(0x8899bb, 0.45);
+const sun = new THREE.DirectionalLight(0xfff0dd, 1.6);
 sun.position.set(20, 30, 10);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
@@ -38,6 +39,8 @@ const player = new Player(scene);
 const dummy = new Dummy(scene);
 const camCtrl = new CameraController(camera, renderer.domElement);
 const fireball = new Fireball(scene, player, camera, dummy);
+
+applyOutlines(scene);
 
 const hud = document.createElement('div');
 hud.id = 'hud';
@@ -110,6 +113,7 @@ function animate() {
   requestAnimationFrame(animate);
 
   if (paused) {
+    ensureOutlines(scene);
     renderer.render(scene, camera);
     return;
   }
@@ -124,6 +128,7 @@ function animate() {
   dummyLabel.textContent = `DUMMY ${Math.ceil(dummy.health)}/${dummy.maxHealth}`;
   dummyBarFill.style.width = `${(dummy.health / dummy.maxHealth) * 100}%`;
 
+  ensureOutlines(scene);
   renderer.render(scene, camera);
 }
 
