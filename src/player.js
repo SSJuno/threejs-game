@@ -253,6 +253,10 @@ export class Player {
       this.mesh.rotation.y = Math.atan2(this.velocity.x, this.velocity.z);
     }
 
+    // Simple forward lean on fast move / dash
+    const lean = THREE.MathUtils.clamp(horizSpeed * (this.dashTimer > 0 ? -0.018 : -0.008), -0.35, 0);
+    this.mesh.rotation.x = THREE.MathUtils.lerp(this.mesh.rotation.x, lean, 8 * dt);
+
     // Fall reset
     if (this.mesh.position.y < -8 && this.velocity.y < -5) {
       this.mesh.position.set(0, 3.5, 0);
