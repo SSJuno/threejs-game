@@ -28,9 +28,9 @@ export function buildArena(scene) {
     colliders.push({ x, y, z, hw, hh, hd });
   }
 
-  // === MAIN FLOOR (larger ~40x46) ===
-  box(40, 0.6, 46, FLOOR, 0, -0.3, 0);
-  addCollider(0, 0, 0, 20, 0.3, 23);
+  // === MAIN FLOOR (expanded castle courtyard ~58x68) ===
+  box(58, 0.6, 68, FLOOR, 0, -0.3, 0);
+  addCollider(0, 0, 0, 29, 0.3, 34);
 
   // === HEIGHT VARIATION - raised platforms for parkour ===
   // Left raised platform (bigger)
@@ -143,17 +143,159 @@ export function buildArena(scene) {
   box(1.7, 1.1, 2.6, STONE, 15.5, 0, -5.5);
   addCollider(15.5, 0.55, -5.5, 0.85, 0.55, 1.3);
 
+  // =====================================================
+  // CASTLE THEME - NORTH END (second floor + bridge + door)
+  // The existing courtyard pillars are the outer bailey.
+  // A large stone gateway (door) leads from the inner castle area
+  // out into the main pillar courtyard.
+  // =====================================================
+
+  const wallBaseZ = 24;
+  const wallH = 7.8;
+
+  // Main curtain wall segments (thick castle walls)
+  // Left segment
+  box(10.5, wallH, 3.8, STONE, -12.5, 0, wallBaseZ);
+  addCollider(-12.5, wallH / 2, wallBaseZ, 5.25, wallH / 2, 1.9);
+
+  // Right segment
+  box(10.5, wallH, 3.8, STONE, 12.5, 0, wallBaseZ);
+  addCollider(12.5, wallH / 2, wallBaseZ, 5.25, wallH / 2, 1.9);
+
+  // Gateway / Door frame (the opening that leads out to the courtyard)
+  // Tall side pillars framing the door
+  box(2.4, 9.2, 4.5, DARK_STONE, -5, 0, wallBaseZ + 0.3);
+  addCollider(-5, 4.6, wallBaseZ + 0.3, 1.2, 4.6, 2.25);
+
+  box(2.4, 9.2, 4.5, DARK_STONE, 5, 0, wallBaseZ + 0.3);
+  addCollider(5, 4.6, wallBaseZ + 0.3, 1.2, 4.6, 2.25);
+
+  // Door lintel (top of the archway)
+  box(12.5, 1.4, 4.8, STONE, 0, 8.3, wallBaseZ + 0.3);
+  addCollider(0, 8.3 + 0.7, wallBaseZ + 0.3, 6.25, 0.7, 2.4);
+
+  // Inner raised floor (castle inner bailey / hall)
+  box(20, 0.9, 14, 0x52575f, 0, 0.45, 28.5);
+  addCollider(0, 0.45 + 0.45, 28.5, 10, 0.45, 7);
+
+  // === TOWERS (tall castle towers flanking the gate) ===
+  const towerH = 11.5;
+
+  // Left tower base + upper
+  box(5.2, towerH, 5.2, STONE, -15, 0, wallBaseZ + 3.5);
+  addCollider(-15, towerH / 2, wallBaseZ + 3.5, 2.6, towerH / 2, 2.6);
+
+  box(5.8, 1.2, 5.8, DARK_STONE, -15, towerH - 0.4, wallBaseZ + 3.5);
+  addCollider(-15, towerH - 0.4 + 0.6, wallBaseZ + 3.5, 2.9, 0.6, 2.9);
+
+  // Right tower
+  box(5.2, towerH, 5.2, STONE, 15, 0, wallBaseZ + 3.5);
+  addCollider(15, towerH / 2, wallBaseZ + 3.5, 2.6, towerH / 2, 2.6);
+
+  box(5.8, 1.2, 5.8, DARK_STONE, 15, towerH - 0.4, wallBaseZ + 3.5);
+  addCollider(15, towerH - 0.4 + 0.6, wallBaseZ + 3.5, 2.9, 0.6, 2.9);
+
+  // === SECOND FLOOR - Battlements on the wall ===
+  const upperY = 7.2;
+
+  // Left upper walkway (second floor)
+  box(8.5, 0.95, 4.2, STONE, -11.5, upperY - 0.1, wallBaseZ - 0.5);
+  addCollider(-11.5, upperY + 0.375, wallBaseZ - 0.5, 4.25, 0.375, 2.1);
+
+  // Right upper walkway
+  box(8.5, 0.95, 4.2, STONE, 11.5, upperY - 0.1, wallBaseZ - 0.5);
+  addCollider(11.5, upperY + 0.375, wallBaseZ - 0.5, 4.25, 0.375, 2.1);
+
+  // Battlements / crenellations (low walls on upper level)
+  box(8.8, 1.4, 0.75, DARK_STONE, -11.5, upperY + 1.1, wallBaseZ - 2.3);
+  addCollider(-11.5, upperY + 1.1 + 0.7, wallBaseZ - 2.3, 4.4, 0.7, 0.375);
+
+  box(8.8, 1.4, 0.75, DARK_STONE, 11.5, upperY + 1.1, wallBaseZ - 2.3);
+  addCollider(11.5, upperY + 1.1 + 0.7, wallBaseZ - 2.3, 4.4, 0.7, 0.375);
+
+  // Side battlements
+  box(0.75, 1.4, 4.2, DARK_STONE, -16, upperY + 1.1, wallBaseZ - 0.5);
+  addCollider(-16, upperY + 1.1 + 0.7, wallBaseZ - 0.5, 0.375, 0.7, 2.1);
+
+  box(0.75, 1.4, 4.2, DARK_STONE, 16, upperY + 1.1, wallBaseZ - 0.5);
+  addCollider(16, upperY + 1.1 + 0.7, wallBaseZ - 0.5, 0.375, 0.7, 2.1);
+
+  // === BRIDGE (stone bridge connecting the two upper walkways / towers) ===
+  const bridgeY = 7.6;
+  const bridgeZ = wallBaseZ + 3;
+
+  // Bridge deck - narrow for exciting dashes and jumps
+  box(19, 0.75, 2.4, STONE, 0, bridgeY, bridgeZ);
+  addCollider(0, bridgeY + 0.375, bridgeZ, 9.5, 0.375, 1.2);
+
+  // Bridge side railings
+  box(19, 0.9, 0.45, DARK_STONE, 0, bridgeY + 1.05, bridgeZ - 1.35);
+  addCollider(0, bridgeY + 1.05 + 0.45, bridgeZ - 1.35, 9.5, 0.45, 0.225);
+
+  box(19, 0.9, 0.45, DARK_STONE, 0, bridgeY + 1.05, bridgeZ + 1.35);
+  addCollider(0, bridgeY + 1.05 + 0.45, bridgeZ + 1.35, 9.5, 0.45, 0.225);
+
+  // Small pillars on the bridge for cover / style
+  box(1.4, 2.2, 1.4, DARK_STONE, -5.5, bridgeY + 0.3, bridgeZ);
+  addCollider(-5.5, bridgeY + 0.3 + 1.1, bridgeZ, 0.7, 1.1, 0.7);
+
+  box(1.4, 2.2, 1.4, DARK_STONE, 5.5, bridgeY + 0.3, bridgeZ);
+  addCollider(5.5, bridgeY + 0.3 + 1.1, bridgeZ, 0.7, 1.1, 0.7);
+
+  // === STAIRS to reach the second floor (near the door) ===
+  // Right side stairs (from courtyard up to upper level)
+  const stairStartX = 6.2;
+  const stairStartZ = 18.5;
+  for (let i = 0; i < 7; i++) {
+    const sh = 0.7;
+    const sw = 2.4;
+    const sd = 1.05;
+    const sx = stairStartX;
+    const sy = i * sh * 0.95;
+    const sz = stairStartZ - i * 0.85;
+    box(sw, sh, sd, STONE, sx, sy, sz);
+    addCollider(sx, sy + sh / 2, sz, sw / 2, sh / 2, sd / 2);
+  }
+
+  // Left side stairs
+  const stairLeftX = -6.2;
+  for (let i = 0; i < 7; i++) {
+    const sh = 0.7;
+    const sw = 2.4;
+    const sd = 1.05;
+    const sx = stairLeftX;
+    const sy = i * sh * 0.95;
+    const sz = stairStartZ - i * 0.85;
+    box(sw, sh, sd, STONE, sx, sy, sz);
+    addCollider(sx, sy + sh / 2, sz, sw / 2, sh / 2, sd / 2);
+  }
+
+  // Inner support pillars / columns in the castle area
+  box(1.5, 7, 1.5, DARK_STONE, -4.5, 0, 26);
+  addCollider(-4.5, 3.5, 26, 0.75, 3.5, 0.75);
+
+  box(1.5, 7, 1.5, DARK_STONE, 4.5, 0, 26);
+  addCollider(4.5, 3.5, 26, 0.75, 3.5, 0.75);
+
+  // Some upper-level cover elements near the bridge
+  box(2, 1.9, 2, STONE, -8, upperY + 0.6, wallBaseZ + 1);
+  addCollider(-8, upperY + 0.6 + 0.95, wallBaseZ + 1, 1, 0.95, 1);
+
+  box(2, 1.9, 2, STONE, 8, upperY + 0.6, wallBaseZ + 1);
+  addCollider(8, upperY + 0.6 + 0.95, wallBaseZ + 1, 1, 0.95, 1);
+
   scene.add(group);
 
   // Subtle fill light for atmosphere (doesn't affect colliders)
-  const moodLight = new THREE.PointLight(0xffe9bb, 0.35, 30);
-  moodLight.position.set(1, 7, -1);
+  const moodLight = new THREE.PointLight(0xffe9bb, 0.4, 35);
+  moodLight.position.set(0, 9, 18);
   group.add(moodLight);
 
   return {
     colliders,
-    // Good starting positions for the larger arena
-    playerStart: new THREE.Vector3(-10, 2.1, -13),
-    dummyStart: new THREE.Vector3(7, 2.0, 8),
+    // Starting positions: player near the door in the courtyard,
+    // dummy in the main pillar area
+    playerStart: new THREE.Vector3(0, 2.1, 14),
+    dummyStart: new THREE.Vector3(-3, 2.0, -4),
   };
 }
