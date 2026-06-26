@@ -35,10 +35,10 @@ sun.shadow.camera.bottom = -35;
 scene.add(ambient, sun);
 
 const colliders = buildWorld(scene);
-const player = new Player(scene);
-const dummy = new Dummy(scene);
 const camCtrl = new CameraController(camera, renderer.domElement);
-const fireball = new Fireball(scene, player, camera, dummy, colliders);
+const player = new Player(scene, camCtrl);
+const dummy = new Dummy(scene);
+const fireball = new Fireball(scene, player, camera, dummy, colliders, camCtrl);
 
 applyOutlines(scene);
 

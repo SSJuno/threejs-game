@@ -13,12 +13,13 @@ const EXPLOSION_DURATION = 0.4;
 const EXPLOSION_MAX = 3.0;
 
 export class Fireball {
-  constructor(scene, player, camera, dummy, worldColliders = []) {
+  constructor(scene, player, camera, dummy, worldColliders = [], camCtrl = null) {
     this.scene = scene;
     this.player = player;
     this.camera = camera;
     this.dummy = dummy;
     this.worldColliders = worldColliders;
+    this.camCtrl = camCtrl;
     this.cooldown = 0;
     this.projectile = null;
     this.explosions = [];
@@ -138,6 +139,7 @@ export class Fireball {
     // World collision
     if (this.checkWorldHit(fb.mesh.position)) {
       this.spawnExplosion(fb.mesh.position.clone());
+      if (this.camCtrl) this.camCtrl.addShake(0.4);
       this.removeProjectile();
       return;
     }
@@ -171,6 +173,7 @@ export class Fireball {
     this.dummy.knockup(KNOCKUP);
     this.spawnExplosion(point);
     this.spawnBurnPatch(point);
+    if (this.camCtrl) this.camCtrl.addShake(0.7);
     this.removeProjectile();
   }
 

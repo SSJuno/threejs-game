@@ -23,8 +23,9 @@ const WALL_JUMP_COOLDOWN = 0.28;
 const WALL_SLIDE_SPEED = -5;
 
 export class Player {
-  constructor(scene) {
+  constructor(scene, camCtrl = null) {
     this.scene = scene;
+    this.camCtrl = camCtrl;
     this.velocity = new THREE.Vector3();
     this.trails = [];
     this.trailGeo = new THREE.BoxGeometry(0.3, 0.3, 0.3);
@@ -159,6 +160,7 @@ export class Player {
     this.dashCooldown = DASH_COOLDOWN;
     this.glideTimer = 0;
     this.velocity.y = Math.max(this.velocity.y, 4); // slight vertical pop
+    if (this.camCtrl) this.camCtrl.addShake(0.35);
     const dirs = {
       w: new THREE.Vector3(0, 0, -1),
       s: new THREE.Vector3(0, 0, 1),

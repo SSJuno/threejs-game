@@ -12,6 +12,8 @@ export class CameraController {
     this.yaw = 0;
     this.pitch = 0.3;
     this._target = new THREE.Vector3();
+    this.shake = 0;
+    this.shakeDecay = 12;
 
     document.addEventListener('click', () => {
       document.body.requestPointerLock();
@@ -32,6 +34,10 @@ export class CameraController {
     domElement.addEventListener('contextmenu', (e) => e.preventDefault());
   }
 
+  addShake(amount) {
+    this.shake = Math.min(1.2, this.shake + amount);
+  }
+
   getForward() {
     return new THREE.Vector3(-Math.sin(this.yaw), 0, -Math.cos(this.yaw));
   }
@@ -49,6 +55,17 @@ export class CameraController {
 
     this._target.copy(playerPos).add(new THREE.Vector3(0, HEIGHT_OFFSET * 0.5, 0));
     const desired = playerPos.clone().add(offset);
+
+    // Apply shake to desired pos and target
+    if (this.shake > 0.001) {
+      const s = this.shake * 0.18;
+      desired.x += (Math.random() - 0.5) * s;
+      desired.y += (Math.random() - 0.5) * s * 0.6;
+      desired.z += (Math.random() - 0.5) * s;
+      this._target.x += (Math.random() - 0.5) * s * 0.5;
+      this._target.z += (Math.random() - 0.5) * s * 0.5;
+      this.shake = Math.max(0, this.shake - this.shakeDecay * dt);
+    }
 
     this.camera.position.lerp(desired, 1 - Math.exp(-SMOOTH * dt));
     this.camera.lookAt(this._target);
