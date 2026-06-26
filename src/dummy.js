@@ -19,6 +19,8 @@ export class Dummy {
     this.hitFlash = 0;
     this.deathState = 'alive';
     this.deathTimer = 0;
+    this.moveTimer = 0;
+    this.moveDir = new THREE.Vector3();
 
     this.mesh = new THREE.Group();
     this.bodyMat = new THREE.MeshLambertMaterial({
@@ -146,6 +148,18 @@ export class Dummy {
         this.headMat.color.setHex(BODY_COLOR);
       }
     }
+
+    // Very basic "evade" AI: occasionally pick a move dir
+    this.moveTimer -= dt;
+    if (this.moveTimer <= 0) {
+      this.moveTimer = 0.7 + Math.random() * 1.1;
+      const angle = Math.random() * Math.PI * 2;
+      this.moveDir.set(Math.cos(angle), 0, Math.sin(angle));
+    }
+
+    const moveSpd = 4.5;
+    this.velocity.x = this.moveDir.x * moveSpd * 0.7;
+    this.velocity.z = this.moveDir.z * moveSpd * 0.7;
 
     this.velocity.y += GRAVITY * dt;
     this.mesh.position.x += this.velocity.x * dt;
