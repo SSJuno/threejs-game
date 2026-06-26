@@ -93,6 +93,7 @@ export class Dummy {
 
   updateDeath(dt, colliders) {
     this.deathTimer += dt;
+    this.resolveWalls(colliders);
     this.resolveFloor(colliders);
 
     if (this.deathState === 'knockdown') {
@@ -166,6 +167,7 @@ export class Dummy {
     this.mesh.position.y += this.velocity.y * dt;
     this.mesh.position.z += this.velocity.z * dt;
 
+    this.resolveWalls(colliders);
     this.resolveFloor(colliders);
 
     if (this.mesh.position.y < -8) {
@@ -200,6 +202,32 @@ export class Dummy {
     if (bestY > -Infinity) {
       pos.y = bestY + DUMMY_H;
       this.velocity.y = 0;
+    }
+  }
+
+  resolveWalls(colliders) {
+    const pos = this.mesh.position;
+    const r = DUMMY_R + 0.05;
+    for (const c of colliders) {
+      const isWall = c.hh > c.hw || c.hh > c.hd;
+      if (!isWall) continue;
+      const cBot = c.y - c.hh;
+      const cTop = c.y + c.hh;
+      if (pos.y + 0.2 < cBot || pos.y - DUMMY_H > cTop) continue;
+
+      const dx = pos.x - c.x;
+      const dz = pos.z - c.z;
+      const ox = c.hw + r - Math.abs(dx);
+      const oz = c.hd + r - Math.abs(dz);
+      if (ox > 0 && oz > 0) {
+        if (ox < oz) {
+          pos.x += dx > 0 ? ox : -ox;
+          this.velocity.x *= 0.3;
+        } else {
+          pos.z += dz > 0 ? oz : -oz;
+          this.velocity.z *= 0.3;
+        }
+      }
     }
   }
 
