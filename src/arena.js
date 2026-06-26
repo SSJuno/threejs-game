@@ -198,13 +198,13 @@ export function buildArena(scene) {
   // === SECOND FLOOR - Battlements on the wall ===
   const upperY = 7.2;
 
-  // Left upper walkway (second floor) - thicker for solid feel
-  box(8.5, 1.1, 4.2, STONE, -11.5, upperY - 0.1, wallBaseZ - 0.5);
-  addCollider(-11.5, upperY + 0.55, wallBaseZ - 0.5, 4.25, 0.55, 2.1);
+  // Left upper walkway (second floor)
+  box(8.5, 0.95, 4.2, STONE, -11.5, upperY - 0.1, wallBaseZ - 0.5);
+  addCollider(-11.5, upperY + 0.375, wallBaseZ - 0.5, 4.25, 0.375, 2.1);
 
   // Right upper walkway
-  box(8.5, 1.1, 4.2, STONE, 11.5, upperY - 0.1, wallBaseZ - 0.5);
-  addCollider(11.5, upperY + 0.55, wallBaseZ - 0.5, 4.25, 0.55, 2.1);
+  box(8.5, 0.95, 4.2, STONE, 11.5, upperY - 0.1, wallBaseZ - 0.5);
+  addCollider(11.5, upperY + 0.375, wallBaseZ - 0.5, 4.25, 0.375, 2.1);
 
   // Battlements / crenellations (low walls on upper level)
   box(8.8, 1.4, 0.75, DARK_STONE, -11.5, upperY + 1.1, wallBaseZ - 2.3);
@@ -224,52 +224,50 @@ export function buildArena(scene) {
   const bridgeY = 7.6;
   const bridgeZ = wallBaseZ + 3;
 
-  // Bridge deck - make it thicker for reliable walking
-  box(19, 1.1, 2.6, STONE, 0, bridgeY, bridgeZ);
-  addCollider(0, bridgeY + 0.55, bridgeZ, 9.5, 0.55, 1.3);
+  // Bridge deck - narrow for exciting dashes and jumps
+  box(19, 0.75, 2.4, STONE, 0, bridgeY, bridgeZ);
+  addCollider(0, bridgeY + 0.375, bridgeZ, 9.5, 0.375, 1.2);
 
-  // Bridge side railings - taller and thicker for solid barriers (prevents falling through sides)
-  box(19, 1.4, 0.6, DARK_STONE, 0, bridgeY + 1.3, bridgeZ - 1.4);
-  addCollider(0, bridgeY + 1.3 + 0.7, bridgeZ - 1.4, 9.5, 0.7, 0.3);
+  // Bridge side railings
+  box(19, 0.9, 0.45, DARK_STONE, 0, bridgeY + 1.05, bridgeZ - 1.35);
+  addCollider(0, bridgeY + 1.05 + 0.45, bridgeZ - 1.35, 9.5, 0.45, 0.225);
 
-  box(19, 1.4, 0.6, DARK_STONE, 0, bridgeY + 1.3, bridgeZ + 1.4);
-  addCollider(0, bridgeY + 1.3 + 0.7, bridgeZ + 1.4, 9.5, 0.7, 0.3);
+  box(19, 0.9, 0.45, DARK_STONE, 0, bridgeY + 1.05, bridgeZ + 1.35);
+  addCollider(0, bridgeY + 1.05 + 0.45, bridgeZ + 1.35, 9.5, 0.45, 0.225);
 
-  // Small pillars on the bridge for cover / style (also act as walls)
-  box(1.6, 2.4, 1.6, DARK_STONE, -5.5, bridgeY + 0.4, bridgeZ);
-  addCollider(-5.5, bridgeY + 0.4 + 1.2, bridgeZ, 0.8, 1.2, 0.8);
+  // Small pillars on the bridge for cover / style
+  box(1.4, 2.2, 1.4, DARK_STONE, -5.5, bridgeY + 0.3, bridgeZ);
+  addCollider(-5.5, bridgeY + 0.3 + 1.1, bridgeZ, 0.7, 1.1, 0.7);
 
-  box(1.6, 2.4, 1.6, DARK_STONE, 5.5, bridgeY + 0.4, bridgeZ);
-  addCollider(5.5, bridgeY + 0.4 + 1.2, bridgeZ, 0.8, 1.2, 0.8);
+  box(1.4, 2.2, 1.4, DARK_STONE, 5.5, bridgeY + 0.3, bridgeZ);
+  addCollider(5.5, bridgeY + 0.3 + 1.1, bridgeZ, 0.7, 1.1, 0.7);
 
   // === STAIRS to reach the second floor (near the door) ===
   // Right side stairs (from courtyard up to upper level)
-  // More forgiving colliders + slight overlap so you don't fall through
   const stairStartX = 6.2;
   const stairStartZ = 18.5;
   for (let i = 0; i < 7; i++) {
-    const sh = 0.75;
-    const sw = 2.8;
-    const sd = 1.4;
+    const sh = 0.7;
+    const sw = 2.4;
+    const sd = 1.05;
     const sx = stairStartX;
-    const sy = i * (sh * 0.88);
-    const sz = stairStartZ - i * 0.78;
+    const sy = i * sh * 0.95;
+    const sz = stairStartZ - i * 0.85;
     box(sw, sh, sd, STONE, sx, sy, sz);
-    // Generous collider for reliable stair climbing
-    addCollider(sx, sy + sh / 2 + 0.1, sz, sw / 2 + 0.2, sh / 2 + 0.15, sd / 2 + 0.2);
+    addCollider(sx, sy + sh / 2, sz, sw / 2, sh / 2, sd / 2);
   }
 
   // Left side stairs
   const stairLeftX = -6.2;
   for (let i = 0; i < 7; i++) {
-    const sh = 0.75;
-    const sw = 2.8;
-    const sd = 1.4;
+    const sh = 0.7;
+    const sw = 2.4;
+    const sd = 1.05;
     const sx = stairLeftX;
-    const sy = i * (sh * 0.88);
-    const sz = stairStartZ - i * 0.78;
+    const sy = i * sh * 0.95;
+    const sz = stairStartZ - i * 0.85;
     box(sw, sh, sd, STONE, sx, sy, sz);
-    addCollider(sx, sy + sh / 2 + 0.1, sz, sw / 2 + 0.2, sh / 2 + 0.15, sd / 2 + 0.2);
+    addCollider(sx, sy + sh / 2, sz, sw / 2, sh / 2, sd / 2);
   }
 
   // Inner support pillars / columns in the castle area
@@ -360,7 +358,7 @@ export function buildArena(scene) {
     colliders,
     // Starting positions: player near the door in the courtyard,
     // dummy in the main pillar area
-    playerStart: new THREE.Vector3(0, 2.1, 14),
-    dummyStart: new THREE.Vector3(-3, 2.0, -4),
+    playerStart: new THREE.Vector3(1, 2.1, 13),   // courtyard facing the main gateway door
+    dummyStart: new THREE.Vector3(-2, 2.0, -6),
   };
 }
