@@ -66,6 +66,13 @@ app.appendChild(dummyHud);
 const dummyLabel = document.getElementById('dummy-label');
 const dummyBarFill = document.getElementById('dummy-bar-fill');
 
+let kills = 0;
+let lastDummyHealth = 100;
+const scoreEl = document.createElement('div');
+scoreEl.id = 'score';
+scoreEl.textContent = 'KILLS: 0';
+app.appendChild(scoreEl);
+
 let paused = false;
 
 const pauseOverlay = document.createElement('div');
@@ -137,6 +144,12 @@ function animate() {
 
   dummyLabel.textContent = `DUMMY ${Math.ceil(dummy.health)}/${dummy.maxHealth}`;
   dummyBarFill.style.width = `${(dummy.health / dummy.maxHealth) * 100}%`;
+
+  if (lastDummyHealth > 0 && dummy.health <= 0) {
+    kills++;
+    scoreEl.textContent = `KILLS: ${kills}`;
+  }
+  lastDummyHealth = dummy.health;
 
   ensureOutlines(scene);
   renderer.render(scene, camera);

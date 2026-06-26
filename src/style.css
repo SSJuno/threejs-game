@@ -64,6 +64,17 @@ canvas {
   transition: width 0.1s linear;
 }
 
+#score {
+  position: fixed;
+  top: 12px;
+  right: 14px;
+  color: #ddcc88;
+  font: 600 14px/1 system-ui, sans-serif;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+  pointer-events: none;
+  letter-spacing: 1px;
+}
+
 #fireball-cooldown {
   margin-top: 8px;
 }
