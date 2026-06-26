@@ -212,3 +212,114 @@ export class Fireball {
     this.projectile = null;
   }
 }
+
+const BLINK_RANGE = 11;
+const BLINK_COOLDOWN = 1.9;
+const BLINK_CD_UI = 1.9;
+
+export class Blink {
+  constructor(scene, player, camera, camCtrl = null) {
+    this.scene = scene;
+    this.player = player;
+    this.camera = camera;
+    this.camCtrl = camCtrl;
+    this.cooldown = 0;
+    this.cdFill = null;
+    this.cdLabel = null;
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'KeyE' && !e.repeat) this.tryBlink();
+    });
+  }
+
+  initCooldownUI() {
+    if (this.cdFill) return;
+    const container = document.querySelector('#app');
+    const el = document.createElement('div');
+    el.id = 'blink-cooldown';
+    el.style.marginTop = '8px';
+    el.innerHTML = `
+      <div id="blink-cd-label">BLINK [E]</div>
+      <div id="blink-cd-track"><div id="blink-cd-fill"></div></div>
+    `;
+    if (container) container.appendChild(el);
+
+    this.cdFill = document.getElementById('blink-cd-fill');
+    this.cdLabel = document.getElementById('blink-cd-label');
+  }
+
+  tryBlink() {
+    if (this.cooldown > 0) return;
+    this.cooldown = BLINK_COOLDOWN;
+
+    const dir = new THREE.Vector3();
+    this.camera.getWorldDirection(dir);
+    dir.y = 0;
+    if (dir.lengthSq() < 0.01) dir.set(0,0,-1);
+    dir.normalize();
+
+    const origin = this.player.mesh.position.clone();
+    const target = origin.clone().addScaledVector(dir, BLINK_RANGE);
+
+    // Simple height preserve + slight lift
+    target.y = Math.max(target.y, origin.y + 0.2);
+
+    // Spawn poof at start
+    this.spawnPoof(origin);
+
+    // Move
+    this.player.mesh.position.copy(target);
+    // Clear some velocity to feel snappy
+    this.player.velocity.x *= 0.2;
+    this.player.velocity.z *= 0.2;
+    this.player.velocity.y = Math.max(this.player.velocity.y, 3);
+
+    this.spawnPoof(target);
+
+    if (this.camCtrl) this.camCtrl.addShake(0.25);
+  }
+
+  update(dt) {
+    this.initCooldownUI();
+    this.cooldown = Math.max(0, this.cooldown - dt);
+
+    if (this.cdFill && this.cdLabel) {
+      const pct = this.cooldown > 0 ? (this.cooldown / BLINK_CD_UI) * 100 : 0;
+      this.cdFill.style.width = `${pct}%`;
+      this.cdLabel.textContent = this.cooldown > 0
+        ? `BLINK ${this.cooldown.toFixed(1)}s`
+        : 'BLINK [E]';
+    }
+  }
+
+  spawnPoof(pos) {
+    const geo = new THREE.SphereGeometry(0.7, 8, 8);
+    const mat = new THREE.MeshBasicMaterial({
+      color: 0xaaccff,
+      transparent: true,
+      opacity: 0.6,
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.copy(pos);
+    this.scene.add(mesh);
+
+    // quick expand + fade
+    const life = 0.22;
+    const start = performance.now();
+    const tick = () => {
+      const t = (performance.now() - start) / 1000 / life;
+      if (t >= 1) {
+        this.scene.remove(mesh);
+        geo.dispose();
+        mat.dispose();
+        return;
+      }
+      const s = 0.4 + t * 2.2;
+      mesh.scale.setScalar(s);
+      mat.opacity = 0.65 * (1 - t);
+      requestAnimationFrame(tick);
+    };
+    tick();
+  }
+}
+

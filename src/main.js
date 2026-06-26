@@ -4,7 +4,7 @@ import { buildWorld } from './world.js';
 import { Player } from './player.js';
 import { CameraController } from './camera.js';
 import { Dummy } from './dummy.js';
-import { Fireball } from './spell.js';
+import { Fireball, Blink } from './spell.js';
 import { applyOutlines, ensureOutlines } from './outline.js';
 
 const app = document.querySelector('#app');
@@ -39,6 +39,7 @@ const camCtrl = new CameraController(camera, renderer.domElement);
 const player = new Player(scene, camCtrl);
 const dummy = new Dummy(scene);
 const fireball = new Fireball(scene, player, camera, dummy, colliders, camCtrl);
+const blink = new Blink(scene, player, camera, camCtrl);
 
 applyOutlines(scene);
 
@@ -129,6 +130,7 @@ function animate() {
   dummy.update(dt, colliders);
   player.update(dt, camCtrl, [...colliders, dummy.collider]);
   fireball.update(dt);
+  blink.update(dt);
   camCtrl.update(player.mesh.position, dt);
 
   dummyLabel.textContent = `DUMMY ${Math.ceil(dummy.health)}/${dummy.maxHealth}`;
