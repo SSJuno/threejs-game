@@ -260,6 +260,7 @@ export class Player {
     // Fall reset
     if (this.mesh.position.y < -8 && this.velocity.y < -5) {
       this.mesh.position.set(0, 3.5, 0);
+      this.mesh.rotation.set(0, 0, 0);
       this.velocity.set(0, 0, 0);
       this.jumpsLeft = 2;
       this.dashTimer = 0;
