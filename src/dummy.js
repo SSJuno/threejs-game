@@ -21,6 +21,8 @@ export class Dummy {
     this.deathTimer = 0;
     this.moveTimer = 0;
     this.moveDir = new THREE.Vector3();
+    this.slowMultiplier = 1;
+    this.slowEndTime = 0;
 
     this.mesh = new THREE.Group();
     this.bodyMat = new THREE.MeshLambertMaterial({
@@ -80,6 +82,14 @@ export class Dummy {
   knockup(force) {
     if (this.deathState !== 'alive') return;
     this.velocity.y = force;
+  }
+
+  applySlow(duration, multiplier = 0.25) {
+    const end = Date.now() + duration * 1000;
+    if (end > this.slowEndTime) {
+      this.slowEndTime = end;
+      this.slowMultiplier = multiplier;
+    }
   }
 
   startDeath() {
@@ -158,7 +168,12 @@ export class Dummy {
       this.moveDir.set(Math.cos(angle), 0, Math.sin(angle));
     }
 
-    const moveSpd = 4.5;
+    let moveSpd = 4.5;
+    if (Date.now() < this.slowEndTime) {
+      moveSpd *= this.slowMultiplier;
+    } else {
+      this.slowMultiplier = 1;
+    }
     this.velocity.x = this.moveDir.x * moveSpd * 0.7;
     this.velocity.z = this.moveDir.z * moveSpd * 0.7;
 

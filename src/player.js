@@ -43,6 +43,9 @@ export class Player {
     this.cloakColor = 0x2233aa;
     this.hatColor = 0x111122;
 
+    // For abilities like Lightning Strike (hold E slows)
+    this.slowFactor = 1;
+
     const gradientMap = createGradientMap();
     this.mesh = new THREE.Group();
 
@@ -187,8 +190,9 @@ export class Player {
     if (this.keys.KeyD) input.add(right);
     if (input.lengthSq() > 0) input.normalize();
 
-    const targetVx = input.x * MOVE_SPEED;
-    const targetVz = input.z * MOVE_SPEED;
+    const slow = this.slowFactor || 1;
+    const targetVx = input.x * MOVE_SPEED * slow;
+    const targetVz = input.z * MOVE_SPEED * slow;
     const onGround = this.onGround;
     const accel = onGround ? ACCEL_GROUND : ACCEL_AIR;
 
@@ -263,6 +267,7 @@ export class Player {
       this.mesh.position.set(1, 3.5, 4);
       this.mesh.rotation.set(0, 0, 0);
       this.velocity.set(0, 0, 0);
+      this.slowFactor = 1; // reset any ability slows
       this.jumpsLeft = 2;
       this.dashTimer = 0;
       this.dashCooldown = 0;
@@ -304,6 +309,36 @@ export class Player {
     const head = pos.y;
     let wallContact = false;
 
+    // Floor resolution FIRST (lifts player onto platforms/pillars before wall checks).
+    // This prevents low walls from pushing player off edges of standable surfaces.
+    let bestY = -Infinity;
+    for (const c of colliders) {
+      const isFloor = c.hh < c.hw && c.hh < c.hd;
+      if (!isFloor) continue;
+
+      const dx = Math.abs(pos.x - c.x);
+      const dz = Math.abs(pos.z - c.z);
+      // Slight extra tolerance for edge standing / platforming feel (prevents easy push-off)
+      const edgeTol = 0.15;
+      if (dx > c.hw + PLAYER_R + edgeTol || dz > c.hd + PLAYER_R + edgeTol) continue;
+
+      const top = c.y + c.hh;
+      const snap = (this.dashTimer > 0 || Math.abs(this.velocity.y) < 6) ? 0.55 : 0.3;
+      if (this.velocity.y <= 0 && feet <= top + snap && feet >= top - snap) {
+        if (top > bestY) bestY = top;
+      }
+    }
+
+    if (bestY > -Infinity) {
+      pos.y = bestY + PLAYER_H;
+      this.velocity.y = 0;
+      this.onGround = true;
+      this.jumpsLeft = 2;
+    } else {
+      this.onGround = false;
+    }
+
+    // Now walls (with updated feet y, so low walls under platforms are skipped)
     for (const c of colliders) {
       const isWall = c.hh > c.hw || c.hh > c.hd;
       if (!isWall) continue;
@@ -326,31 +361,6 @@ export class Player {
         }
         wallContact = true;
       }
-    }
-
-    let bestY = -Infinity;
-    for (const c of colliders) {
-      const isFloor = c.hh < c.hw && c.hh < c.hd;
-      if (!isFloor) continue;
-
-      const dx = Math.abs(pos.x - c.x);
-      const dz = Math.abs(pos.z - c.z);
-      if (dx > c.hw + PLAYER_R || dz > c.hd + PLAYER_R) continue;
-
-      const top = c.y + c.hh;
-      const snap = (this.dashTimer > 0 || Math.abs(this.velocity.y) < 6) ? 0.55 : 0.3;
-      if (this.velocity.y <= 0 && feet <= top + snap && feet >= top - snap) {
-        if (top > bestY) bestY = top;
-      }
-    }
-
-    if (bestY > -Infinity) {
-      pos.y = bestY + PLAYER_H;
-      this.velocity.y = 0;
-      this.onGround = true;
-      this.jumpsLeft = 2;
-    } else {
-      this.onGround = false;
     }
 
     this.isTouchingWall = wallContact && !this.onGround;

@@ -1,10 +1,10 @@
 import './style.css';
 import * as THREE from 'three';
-import { buildArena } from './arena.js';
+import { availableMaps } from './mapRegistry.js';
 import { Player } from './player.js';
 import { CameraController } from './camera.js';
 import { Dummy } from './dummy.js';
-import { Fireball, Blink, Nova } from './spell.js';
+import { Fireball, Blink, Nova, IcePillar } from './spell.js';
 import { applyOutlines, ensureOutlines } from './outline.js';
 
 const app = document.querySelector('#app');
@@ -34,23 +34,35 @@ sun.shadow.camera.top = 35;
 sun.shadow.camera.bottom = -35;
 scene.add(ambient, sun);
 
-// === MAP SELECTION (easy to swap) ===
-// To use the old courtyard: import { buildWorld } from './world.js'; then const colliders = buildWorld(scene);
-// Current:
-const arena = buildArena(scene);
-const colliders = arena.colliders;
+// === MAP SELECTION SYSTEM ===
+// Uses mapRegistry.js for easy extension. 
+// 'ruins' = original arena map (unchanged)
+// 'fantasy' = new crystalline map
+// Current map loaded from sessionStorage or defaults to 'ruins' (index 0).
+// IMPORTANT: The original map (arena.js) is NEVER modified.
+let selectedMapIndex = 0;
+try {
+  const saved = sessionStorage.getItem('selectedMapIndex');
+  if (saved !== null) {
+    selectedMapIndex = Math.max(0, Math.min(parseInt(saved, 10), availableMaps.length - 1));
+  }
+} catch (e) {}
+
+const currentMap = availableMaps[selectedMapIndex] || availableMaps[0];
+const arenaData = currentMap.builder(scene);
+let colliders = arenaData.colliders;
 
 const camCtrl = new CameraController(camera, renderer.domElement);
 const player = new Player(scene, camCtrl);
 const dummy = new Dummy(scene);
 
 // Apply map-specific spawns for easy swapping
-if (arena.playerStart) {
-  player.mesh.position.copy(arena.playerStart);
+if (arenaData.playerStart) {
+  player.mesh.position.copy(arenaData.playerStart);
 }
-if (arena.dummyStart) {
-  dummy.mesh.position.copy(arena.dummyStart);
-  const ds = arena.dummyStart;
+if (arenaData.dummyStart) {
+  dummy.mesh.position.copy(arenaData.dummyStart);
+  const ds = arenaData.dummyStart;
   dummy.collider.x = ds.x;
   dummy.collider.y = ds.y - 0.9; // DUMMY_H / 2
   dummy.collider.z = ds.z;
@@ -60,11 +72,14 @@ const fireball = new Fireball(scene, player, camera, dummy, colliders, camCtrl);
 const blink = new Blink(scene, player, camera, camCtrl);
 const nova = new Nova(scene, player, dummy, camCtrl);
 
+// Ice Pillar (hold E to aim, release to cast rising ice pillar that slows)
+const icePillar = new IcePillar(scene, player, camera, dummy, colliders, camCtrl);
+
 applyOutlines(scene);
 
 const hud = document.createElement('div');
 hud.id = 'hud';
-hud.innerHTML = 'WASD · Double-tap dash · Space double-jump/wall · Q Fireball · E Blink · R Nova · Mouse aim · Esc pause';
+hud.innerHTML = 'WASD · Double-tap dash · Space double-jump/wall · Q Fireball · Hold E: Ice Pillar · Shift: Blink · R Nova · Mouse aim · Esc pause';
 app.appendChild(hud);
 
 // Crosshair
@@ -90,6 +105,30 @@ const scoreEl = document.createElement('div');
 scoreEl.id = 'score';
 scoreEl.textContent = 'KILLS: 0';
 app.appendChild(scoreEl);
+
+// === Ability UI (bottom left for Q, bottom right for E) ===
+// Clean minimal slots as requested. Cooldowns will be updated by the ability classes.
+const abilitiesContainer = document.createElement('div');
+abilitiesContainer.id = 'abilities-ui';
+abilitiesContainer.innerHTML = `
+  <div id="ability-q" class="ability-slot">
+    <div class="ability-header">
+      <span class="ability-key">Q</span>
+      <span class="ability-name">Fireball</span>
+    </div>
+    <div class="ability-cd-track"><div id="q-cd-fill" class="ability-cd-fill"></div></div>
+    <div class="ability-cooldown-text" id="q-cd-text"></div>
+  </div>
+  <div id="ability-e" class="ability-slot">
+    <div class="ability-header">
+      <span class="ability-name">Ice Pillar</span>
+      <span class="ability-key">E (hold)</span>
+    </div>
+    <div class="ability-cd-track"><div id="e-cd-fill" class="ability-cd-fill" style="background:#88ccff;"></div></div>
+    <div class="ability-cooldown-text" id="e-cd-text"></div>
+  </div>
+`;
+app.appendChild(abilitiesContainer);
 
 let paused = false;
 
@@ -126,6 +165,59 @@ document.getElementById('pause-resume').addEventListener('click', resumeGame);
 document.getElementById('pause-quit').addEventListener('click', () => {
   location.reload();
 });
+
+// Add "Select Map" button to pause menu
+const selectMapBtn = document.createElement('button');
+selectMapBtn.type = 'button';
+selectMapBtn.className = 'pause-option';
+selectMapBtn.textContent = 'SELECT MAP';
+selectMapBtn.style.marginTop = '12px';
+document.getElementById('pause-menu').appendChild(selectMapBtn);
+
+// Simple map selection overlay (easy to extend)
+const mapSelectOverlay = document.createElement('div');
+mapSelectOverlay.id = 'map-select-overlay';
+mapSelectOverlay.style.cssText = 'position:fixed; inset:0; background:rgba(10,15,35,0.85); display:none; align-items:center; justify-content:center; z-index:200; flex-direction:column;';
+mapSelectOverlay.innerHTML = `
+  <h2 style="color:#e8f0ff; font-size:32px; margin-bottom:20px;">Select Map</h2>
+  <div id="map-buttons" style="display:flex; flex-direction:column; gap:12px;"></div>
+  <button id="map-back" style="margin-top:24px; background:transparent; border:1px solid #78aaff; color:#c8d8f0; padding:8px 24px; cursor:pointer;">BACK</button>
+`;
+app.appendChild(mapSelectOverlay);
+
+selectMapBtn.addEventListener('click', () => {
+  pauseOverlay.hidden = true;
+  showMapSelect();
+});
+
+function showMapSelect() {
+  const buttonsContainer = document.getElementById('map-buttons');
+  buttonsContainer.innerHTML = '';
+  availableMaps.forEach((map, idx) => {
+    const btn = document.createElement('button');
+    btn.textContent = map.name + (idx === selectedMapIndex ? ' (current)' : '');
+    btn.style.cssText = 'background:transparent; border:1px solid #78aaff; color:#c8d8f0; padding:12px 48px; font-size:18px; cursor:pointer;';
+    btn.addEventListener('click', () => {
+      if (idx !== selectedMapIndex) {
+        sessionStorage.setItem('selectedMapIndex', idx);
+        location.reload();
+      } else {
+        hideMapSelect();
+        pauseOverlay.hidden = false;
+      }
+    });
+    buttonsContainer.appendChild(btn);
+  });
+  mapSelectOverlay.style.display = 'flex';
+  document.getElementById('map-back').onclick = () => {
+    hideMapSelect();
+    pauseOverlay.hidden = false;
+  };
+}
+
+function hideMapSelect() {
+  mapSelectOverlay.style.display = 'none';
+}
 
 window.addEventListener('keydown', (e) => {
   if (e.code === 'Escape') {
@@ -171,7 +263,13 @@ function animate() {
   fireball.update(dt);
   blink.update(dt);
   nova.update(dt);
+  icePillar.update(dt);  // Ice Pillar (hold E)
   camCtrl.update(player.mesh.position, dt);
+
+  // Call optional map-specific update (e.g. rain on fantasy map)
+  if (arenaData.update) {
+    arenaData.update(dt);
+  }
 
   dummyLabel.textContent = `DUMMY ${Math.ceil(dummy.health)}/${dummy.maxHealth}`;
   dummyBarFill.style.width = `${(dummy.health / dummy.maxHealth) * 100}%`;

@@ -53,10 +53,17 @@ export function buildArena(scene) {
     { x: 11,    z: 11.5, h: 9.8,  w: 2.15 },
   ];
   for (const p of intact) {
-    box(p.w, p.h, p.w, STONE, p.x, 0, p.z);
-    addCollider(p.x, p.h / 2, p.z, p.w / 2, p.h / 2, p.w / 2);
-    // Mossy cap
+    // Body: slightly shorter so wall collider doesn't reach standing height (prevents edge push)
+    const bodyH = p.h - 0.4;
+    box(p.w, bodyH, p.w, STONE, p.x, 0, p.z);
+    addCollider(p.x, bodyH / 2, p.z, p.w / 2, bodyH / 2, p.w / 2);
+    // Mossy cap (visual)
     box(p.w * 1.12, 0.48, p.w * 1.12, MOSS, p.x, p.h - 0.05, p.z);
+
+    // Top standable floor collider (small hh so isFloor=true, player can stand/walk on pillar top)
+    // Positioned at the actual top surface
+    const topY = p.h;
+    addCollider(p.x, topY + 0.05, p.z, p.w / 2 * 1.05, 0.2, p.w / 2 * 1.05);
   }
 
   // === BROKEN / COLLAPSED PILLARS (spread for larger map) ===
@@ -243,29 +250,29 @@ export function buildArena(scene) {
   addCollider(5.5, bridgeY + 0.3 + 1.1, bridgeZ, 0.7, 1.1, 0.7);
 
   // === STAIRS to reach the second floor (near the door) ===
-  // Right side stairs (from courtyard up to upper level)
+  // Right side stairs - more steps with smaller height for better compatibility with stable player snapping (vel.y <=0 + small snap)
   const stairStartX = 6.2;
   const stairStartZ = 18.5;
-  for (let i = 0; i < 7; i++) {
-    const sh = 0.7;
-    const sw = 2.4;
-    const sd = 1.05;
+  for (let i = 0; i < 10; i++) {
+    const sh = 0.5;
+    const sw = 2.6;
+    const sd = 1.1;
     const sx = stairStartX;
-    const sy = i * sh * 0.95;
-    const sz = stairStartZ - i * 0.85;
+    const sy = i * sh * 0.9;
+    const sz = stairStartZ - i * 0.65;
     box(sw, sh, sd, STONE, sx, sy, sz);
     addCollider(sx, sy + sh / 2, sz, sw / 2, sh / 2, sd / 2);
   }
 
   // Left side stairs
   const stairLeftX = -6.2;
-  for (let i = 0; i < 7; i++) {
-    const sh = 0.7;
-    const sw = 2.4;
-    const sd = 1.05;
+  for (let i = 0; i < 10; i++) {
+    const sh = 0.5;
+    const sw = 2.6;
+    const sd = 1.1;
     const sx = stairLeftX;
-    const sy = i * sh * 0.95;
-    const sz = stairStartZ - i * 0.85;
+    const sy = i * sh * 0.9;
+    const sz = stairStartZ - i * 0.65;
     box(sw, sh, sd, STONE, sx, sy, sz);
     addCollider(sx, sy + sh / 2, sz, sw / 2, sh / 2, sd / 2);
   }
