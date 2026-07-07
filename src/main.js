@@ -13,7 +13,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87a8c4);
 scene.fog = new THREE.Fog(0x87a8c4, 30, 80);
 
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 200);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -52,7 +52,7 @@ const currentMap = availableMaps[selectedMapIndex] || availableMaps[0];
 const arenaData = currentMap.builder(scene);
 let colliders = arenaData.colliders;
 
-const camCtrl = new CameraController(camera, renderer.domElement);
+const camCtrl = new CameraController(camera, renderer.domElement, colliders);
 const player = new Player(scene, camCtrl);
 const dummy = new Dummy(scene);
 
